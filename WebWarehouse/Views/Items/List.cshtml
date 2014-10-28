@@ -1,0 +1,61 @@
+﻿@model IEnumerable<WebWarehouse.Models.Item>
+
+@{
+    ViewBag.Title = "List";
+}
+
+
+
+<h2>@ViewBag.CategoryName</h2>
+
+
+
+
+@if (Model.ToList().Count == 0)
+{
+    <div class="jumbotron">
+        <h2>Det er ingen varer i denne kategorien. Kom igjen senere for å kjøpe noe!</h2>
+    </div>
+}
+else
+{
+    <table class="table table-striped">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+
+@if (ViewBag.LoggedInn == true)
+{
+    <th>Kjøp</th>
+}
+           
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+
+               @if (ViewBag.LoggedInn == true)
+{
+                <td>
+                    <a href="#">
+                        <i class="fa fa-shopping-cart fa-2x"></i>
+                    </a>
+                </td>
+               }
+            </tr>
+        }
+
+    </table>
+}
