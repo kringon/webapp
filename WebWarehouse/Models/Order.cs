@@ -17,9 +17,6 @@ namespace WebWarehouse.Models
         public OrderEnum status { get; set; }
         public DateTime ordered { get; set; }
         public DateTime delivered { get; set; }
-     
-
-
         public virtual ICollection<Item> Items { get; set; }
 
         public decimal getTotalPrice(){

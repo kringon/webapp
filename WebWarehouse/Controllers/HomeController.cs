@@ -7,7 +7,7 @@ using WebWarehouse.DAL;
 
 namespace WebWarehouse.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : MyController
     {
 
         private WarehouseContext db = new WarehouseContext();
@@ -21,33 +21,6 @@ namespace WebWarehouse.Controllers
             return View(db.ItemCategorys.ToList());
         }
 
-        private void CheckLoginStatus()
-        {
-            if (Session["LoggedInn"] == null)
-            {
-                Session["LoggedInn"] = false;
-            }
-            else
-            {
-                ViewBag.LoggedInn = (bool)Session["LoggedInn"];
-            }
-
-
-        }
-
-        private void addCustomMessages()
-        {
-            if (TempData["ErrorMessage"] != null)
-            {
-                @ViewBag.ErrorMessage = TempData["ErrorMessage"].ToString();
-            }
-
-            if (TempData["SuccessMessage"] != null)
-            {
-                @ViewBag.SuccessMessage = TempData["SuccessMessage"].ToString();
-            }
-
-            @ViewBag.UserID = Session["UserID"];
-        }
+       
     }
 }

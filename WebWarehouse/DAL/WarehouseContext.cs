@@ -15,6 +15,7 @@ namespace WebWarehouse.DAL
         public DbSet<Order> Orders { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<ItemCategory> ItemCategorys { get; set; }
+        
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

@@ -17,6 +17,10 @@ namespace WebWarehouse.Models
         [StringLength(50)]
         public string Address { get; set; }
 
+        
+
+        public UserRole Role { get; set; }
+
 
         public virtual ICollection<Order> Orders { get; set; }
     }

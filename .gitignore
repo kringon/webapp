@@ -1,0 +1,4 @@
+WebWarehouse/bin/
+WebWarehouse/obj/Debug/
+WebWarehouse/App_Data/Warehouse.mdf
+WebWarehouse/App_Data/Warehouse_log.ldf

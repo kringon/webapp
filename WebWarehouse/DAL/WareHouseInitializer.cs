@@ -10,6 +10,15 @@ namespace WebWarehouse.DAL
     {
         protected override void Seed(WarehouseContext context)
         {
+            var users = new List<User>
+            {
+                new User{Username="asdf",Password=hash("asdf"),Address="asdf",  Role = UserRole.Admin},
+                new User{Username="qwer",Password=hash("qwer"),Address="qwer", Role = UserRole.Customer},
+
+            
+            };
+            users.ForEach(u => context.Users.Add(u));
+            context.SaveChanges();
 
             var itemCateogories = new List<ItemCategory>{
                 new ItemCategory{Name="Klær"},
@@ -20,7 +29,7 @@ namespace WebWarehouse.DAL
                 new ItemCategory{Name="Elektronikk"},
                 new ItemCategory{Name="Musikk"},
             };
-            itemCateogories.ForEach(i => context.ItemCategorys.Add(i));
+            itemCateogories.ForEach(ic => context.ItemCategorys.Add(ic));
             context.SaveChanges();
 
             var items = new List<Item>{
@@ -31,21 +40,14 @@ namespace WebWarehouse.DAL
             items.ForEach(i => context.Items.Add(i));
             context.SaveChanges();
 
-            var orders = new List<Order>{
-                new Order{ordered=new DateTime(), delivered=new DateTime(),status=OrderEnum.Ordered, Items=items}
-            };
-            orders.ForEach(o => context.Orders.Add(o));
-            context.SaveChanges();
+            //var orders = new List<Order>{
+            //    new Order{ordered=new DateTime(), delivered=new DateTime(),status=OrderEnum.Ordered}
+            //};
+            //orders.ForEach(o => context.Orders.Add(o));
+            //context.SaveChanges();
 
 
-            var users = new List<User>
-            {
-                new User{Username="asdf",Password=hash("asdf"),Address="te", Orders=orders},
-
-            
-            };
-            users.ForEach(s => context.Users.Add(s));
-            context.SaveChanges();
+        
         }
 
         private String hash(string password)
@@ -55,5 +57,7 @@ namespace WebWarehouse.DAL
             return Convert.ToBase64String(algoritme.ComputeHash(data));
 
         }
+
+
     }
 }

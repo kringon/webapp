@@ -11,7 +11,7 @@ using WebWarehouse.Models;
 
 namespace WebWarehouse.Controllers
 {
-    public class UsersController : Controller
+    public class UsersController : MyController
     {
         private WarehouseContext db = new WarehouseContext();
 
@@ -21,6 +21,8 @@ namespace WebWarehouse.Controllers
             Session["LoggedInn"] = false;
             Session["UserID"] = null;
             ViewBag.LoggedInn = false;
+            Session["Role"] = null;
+            ViewBag.Role = null;
 
             return RedirectToAction("Index", "Home");
         }
@@ -45,8 +47,10 @@ namespace WebWarehouse.Controllers
             {
                 Session["LoggedInn"] = true;
                 Session["UserId"] = existingUser.ID;
+                Session["UserRole"] = existingUser.Role;
                 
-                TempData["SuccessMessage"] = "Du er nå logget inn med bruker ID: "  + existingUser.ID;
+                
+                TempData["SuccessMessage"] = "Du er nå logget inn med bruker ID: "  + existingUser.ID + " Role: " + existingUser.Role;
 
                 return RedirectToAction("Index", "Home");
             }
@@ -256,37 +260,7 @@ namespace WebWarehouse.Controllers
         }
 
 
-        private bool CheckLoginStatus()
-        {
-            if (Session["LoggedInn"] == null)
-            {
-                Session["LoggedInn"] = false;
-                ViewBag.LoggedInn = false;
-                return false;
-
-            }
-            else
-            {
-                ViewBag.LoggedInn = (bool)Session["LoggedInn"];
-                return (bool)Session["LoggedInn"];
-            }
-
-
-        }
-
-        private void addCustomMessages()
-        {
-            if (TempData["ErrorMessage"] != null)
-            {
-                @ViewBag.ErrorMessage = TempData["ErrorMessage"].ToString();
-            }
-
-            if (TempData["SuccessMessage"] != null)
-            {
-                @ViewBag.SuccessMessage = TempData["SuccessMessage"].ToString();
-            }
-            @ViewBag.UserID = Session["UserID"];
-        }
+     
     }
 
 
