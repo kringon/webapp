@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using WebWarehouse.Models;
 
 namespace WebWarehouse.Controllers
 {
@@ -13,14 +14,18 @@ namespace WebWarehouse.Controllers
             if (Session["LoggedInn"] == null)
             {
                 Session["LoggedInn"] = false;
+                Session["Role"] = UserRole.Unknown.ToString();
                 ViewBag.LoggedInn = false;
+                ViewBag.Role = UserRole.Unknown.ToString();
                 return false;
 
             }
             else
             {
                 ViewBag.LoggedInn = (bool)Session["LoggedInn"];
-                ViewBag.Role = Session["UserRole"];
+                ViewBag.Role = Session["Role"];
+
+                
                 return (bool)Session["LoggedInn"];
             }
 

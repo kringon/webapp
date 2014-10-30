@@ -20,9 +20,9 @@ namespace WebWarehouse.Controllers
         {
             Session["LoggedInn"] = false;
             Session["UserID"] = null;
+            Session["Role"] = UserRole.Unknown.ToString();
             ViewBag.LoggedInn = false;
-            Session["Role"] = null;
-            ViewBag.Role = null;
+            ViewBag.Role = UserRole.Unknown.ToString();
 
             return RedirectToAction("Index", "Home");
         }
@@ -47,7 +47,7 @@ namespace WebWarehouse.Controllers
             {
                 Session["LoggedInn"] = true;
                 Session["UserId"] = existingUser.ID;
-                Session["UserRole"] = existingUser.Role;
+                Session["Role"] = existingUser.Role.ToString();
                 
                 
                 TempData["SuccessMessage"] = "Du er nå logget inn med bruker ID: "  + existingUser.ID + " Role: " + existingUser.Role;
@@ -57,6 +57,7 @@ namespace WebWarehouse.Controllers
             else
             {
                 Session["LoggedInn"] = false;
+                Session["Role"] = UserRole.Unknown.ToString();
                 ViewBag.ErrorMessage = "Du skrev ikke inn riktige verdier. Prøv på nytt.";
                 return View();
             }

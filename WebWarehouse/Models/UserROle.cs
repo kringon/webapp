@@ -12,6 +12,7 @@ namespace WebWarehouse.Models
         //Can edit content, but not users
         Editor,
         //Can only use website / order
-        Customer
+        Customer,
+        Unknown
     }
 }
