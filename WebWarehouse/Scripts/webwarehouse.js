@@ -39,8 +39,11 @@ $(function () {
     }
 });
 
-//JS for initialising date-timepicker on create/edit-view for user
-$(function () {
-    $('#birthDateTime').datetimepicker({
-    });
+
+$(function () { // will trigger when the document is ready
+    $('.datepicker').datetimepicker({
+
+        
+                      //en/disables the seconds picker
+    }); //Initialise any date pickers
 });

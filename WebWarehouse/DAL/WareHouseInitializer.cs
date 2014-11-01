@@ -4,7 +4,7 @@ using WebWarehouse.Models;
 
 namespace WebWarehouse.DAL
 {
-    public class WareHouseInitializer : System.Data.Entity.DropCreateDatabaseIfModelChanges<WarehouseContext>
+    public class WareHouseInitializer : System.Data.Entity.DropCreateDatabaseAlways<WarehouseContext>
     {
         protected override void Seed(WarehouseContext context)
         {
@@ -27,9 +27,13 @@ namespace WebWarehouse.DAL
             };
             items.ForEach(i => context.Items.Add(i));
             context.SaveChanges();
+            var numberOfItems = new List<ItemQuantity>();
 
+            items.ForEach(i => numberOfItems.Add(new ItemQuantity() { Value=1, Item=i}));
+            
+            
             var orders = new List<Order>{
-                new Order{Ordered=DateTime.Parse("2014-04-04"), Delivered=DateTime.Parse("2014-05-05"),Status=OrderEnum.Ordered, Items=items}
+                new Order{Ordered=DateTime.Parse("2014-04-04"), Delivered=DateTime.Parse("2014-05-05"),Status=OrderEnum.Ordered, Items=items,ItemQuantities=numberOfItems}
             };
             var users = new List<User>
             {

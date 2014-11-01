@@ -13,6 +13,79 @@ namespace WebWarehouse.Controllers
         private WarehouseContext db = new WarehouseContext();
 
         [HttpGet]
+        public ActionResult Reciept(int? orderID)
+        {
+            CheckLoginStatus();
+            addCustomMessages();
+            if (orderID == null)
+            {
+                TempData["ErrorMessage"] = "Her har det skjedd noe galt -> Prøver du å lure systemet?";
+                return RedirectToAction("Index", "Home");
+            }
+
+            Order recieptOrder = db.Orders.Find(orderID);
+            if (Session["UserID"].Equals(recieptOrder.user.ID))
+            {
+                if (recieptOrder != null)
+                {
+                    recieptOrder.Status = OrderEnum.Payed;
+                    recieptOrder.Ordered = System.DateTime.Now;
+
+                    db.Entry(recieptOrder).State = EntityState.Modified;
+
+                    db.SaveChanges();
+                    TempData["SuccessMessage"] = "Gratulerer! Du har bestilt. Handlelisten er tømt og du kan følge bestillingen på 'Min Bruker => Min Ordrehistorikk'";
+                    addCustomMessages();
+
+                    return View(recieptOrder);
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Det finnes ikke noen ordre med den ID'en";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Du har ikke lov til å sjekke ut den Ordren!";
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult CheckOut(int? orderID)
+        {
+            CheckLoginStatus();
+            addCustomMessages();
+            if (orderID == null)
+            {
+                TempData["ErrorMessage"] = "Du må vite hvilken ordre du skal sjekke ut";
+                return RedirectToAction("Index", "Home");
+            }
+            Order checkoutOrder = db.Orders.Find(orderID);
+
+            if (Session["UserID"].Equals(checkoutOrder.user.ID))
+            {
+                if (checkoutOrder != null)
+                {
+                    TempData["SuccessMessage"] = "Du er nå ett steg unna å fullføre ordren";
+                    addCustomMessages();
+                    return View(checkoutOrder);
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Det finnes ikke noen ordre med den ID'en";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Du har ikke lov til å sjekke ut den Ordren!";
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet]
         public ActionResult ActiveOrder(int? id)
         {
             CheckLoginStatus();
@@ -29,10 +102,12 @@ namespace WebWarehouse.Controllers
             if (emptyOrder == null && browsingOrder == null)
             {
                 Order newOrder = new Order();
+                newOrder.Items = new List<Item>();
                 user.Orders.Add(newOrder);
 
                 db.Entry(user).State = EntityState.Modified;
                 db.SaveChanges();
+
                 return PartialView(newOrder);
             }
             if (browsingOrder != null)
@@ -64,12 +139,18 @@ namespace WebWarehouse.Controllers
                     order.Status = OrderEnum.Empty;
 
                     order.Items = new List<Item>();
+                    order.ItemQuantities = new List<ItemQuantity>();
                     user.Orders.Add(order);
                     db.Entry(user).State = EntityState.Modified;
                     db.SaveChanges();
                 }
 
                 order.Items.Add(item);
+                ItemQuantity quantity = order.getItemQuantity(item);
+                if (quantity != null)
+                    quantity.Value++;
+                else
+                    order.ItemQuantities.Add(new ItemQuantity() { Value = 1, Item = item });
 
                 if (order.Status == OrderEnum.Empty)
                     order.Status = OrderEnum.Browsing;
@@ -176,10 +257,11 @@ namespace WebWarehouse.Controllers
         // properties you want to bind to, for more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,status")] Order order)
+        public ActionResult Edit([Bind(Include = "ID,Status,Ordered,Delivered,UserID")] Order order)
         {
             CheckLoginStatus();
             addCustomMessages();
+
             if (ModelState.IsValid)
             {
                 db.Entry(order).State = EntityState.Modified;
@@ -199,7 +281,7 @@ namespace WebWarehouse.Controllers
 
         public ActionResult RemoveItem(int? itemid, int? userid)
         {
-            if (!Session["UserID"].Equals(userid))
+            if (!Session["UserID"].Equals(userid) && !Session["Role"].Equals(UserRole.Admin.ToString()))
             {
                 //invalid userID
                 return Json(new { error = "Invalid userID" }, JsonRequestBehavior.AllowGet);
@@ -215,12 +297,13 @@ namespace WebWarehouse.Controllers
 
                 if (order == null)
                 {
-                    return Json(new { error = "Something Went Wrong during removal. Please contact administrator" }, JsonRequestBehavior.AllowGet);
+                    return Json(new { error = "Something Went Wrong during removal. Please contact administrator. ItemID:" + itemid + " UserID:" + userid }, JsonRequestBehavior.AllowGet);
                 }
 
                 order.Items.Remove(item);
+                order.ItemQuantities.Remove(order.getItemQuantity(item));
 
-                if (user.Orders.Count == 0)
+                if (order.Items.Count == 0)
                     order.Status = OrderEnum.Empty;
 
                 db.Entry(order).State = EntityState.Modified;

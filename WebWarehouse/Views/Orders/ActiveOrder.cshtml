@@ -21,6 +21,10 @@
                         Pris
                     </th>
                     <th>
+                        Antall
+                    </th>
+                    <th>Sum</th>
+                    <th>
                         Fjern
                     </th>
                 </tr>
@@ -35,7 +39,9 @@
                         <td>@item.ID</td>
                         <td>@item.Name</td>
                         <td>@item.Price kr</td>
-                        <td><button class="btn btn-danger shoppingCartRemove" data-userid="@ViewBag.UserID" data-itemid="@item.ID"><i class="fa fa-remove "></i></button></td>
+                        <td>@Model.getItemQuantity(item).Value stk</td>
+                        <td>@Model.getItemQuantity(item).getTotalValue() kr</td>
+                        <td><button class="btn btn-danger shoppingCartRemove" data-userid="@Model.user.ID" data-itemid="@item.ID"><i class="fa fa-remove "></i></button></td>
                     </tr>
 
 
@@ -45,12 +51,12 @@
         </table>
         <div class="row">
             
-                        <div class="col col-xs-4"><b>Sum: </b><span id="totalPrice">@Model.getTotalPrice()</span> kr</div>
+                        <div class="col col-xs-4"><b>Ordresum: </b><span id="totalPrice">@Model.getTotalPrice()</span> kr</div>
         </div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Lukk</button>
-        <button type="button" class="btn btn-primary">Betal</button>
+        <a href="@Url.Action("CheckOut", "Orders", new { orderID = @Model.ID })" class="btn btn-primary">Betal</a>
     </div>
 </div>
 

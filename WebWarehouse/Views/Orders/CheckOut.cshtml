@@ -1,0 +1,178 @@
+﻿@model WebWarehouse.Models.Order
+
+@{
+    ViewBag.Title = "Checkout";
+}
+
+<h2>Fullfør bestilling</h2>
+
+<div class="row">
+    <div class="col col-md-7">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal">
+                <h4>Order</h4>
+                <hr />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.ID)
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextBoxFor(model => model.Status, htmlAttributes: new { @class = "form-control", @readonly = "" })
+                        @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.user.Username, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+
+
+                        <input class="form-control valid" id="user" type="text" value="@Model.user.Username" name="Username" readonly="">
+                        @Html.ValidationMessageFor(model => model.user, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Ordered, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+
+
+                        @Html.TextBoxFor(model => model.Ordered, htmlAttributes: new { @class = "form-control datepicker", @data_val = "false", @readonly = "", placeholder = "Has not been ordered yet...", data_date_format = "DD.MM.YYYY HH:mm:ss" })
+                        @Html.ValidationMessageFor(model => model.Ordered, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Delivered, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextBoxFor(model => model.Delivered, htmlAttributes: new { @class = "form-control datepicker", @data_val = "false", @readonly = "", placeholder = "Not Delivered", data_date_format = "DD.MM.YYYY HH:mm:ss" })
+                        @Html.ValidationMessageFor(model => model.Delivered, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+
+
+
+            </div>
+        }
+
+    </div>
+    <div class="col col-md-5">
+        <div class="well">
+            <h3>Betalingsinformasjon <i class="fa fa-dollar  fa-2x"></i></h3>
+
+            <table class="table table-condensed">
+                <tr>
+                    <td> Samlepris for alle varene: </td>
+                    <td id="totalItemPrice" style="text-align:right;">@Model.getTotalPrice() kr</td>
+                </tr><tr>
+                         <td>Standardkostnad for frakt:</td>
+                         <td style="text-align:right;">0,00 kr</td>
+                </tr>
+                <tr>
+                    <td><b>Totalt å betale: </b></td>
+                    <td style="text-align:right;"><b id="totalPrice">@Model.getTotalPrice() kr</b></td>
+                </tr>
+
+            </table>
+
+
+            <h4>Velg betalingsmåte: </h4>
+            <a href="@Url.Action("Reciept", "Orders", new { orderID = @Model.ID})" class="btn btn-primary btn-lg"><i class="fa fa-cc-mastercard fa-3x"></i></a>
+            <a href="" class="btn btn-default btn-lg"><i class="fa fa-cc-visa fa-3x"></i></a>
+            <a href="" class="btn btn-warning btn-lg"><i class="fa fa-cc-paypal fa-3x"></i></a>
+            <a href="" class="btn btn-danger btn-lg"><i class="fa fa-google-wallet fa-3x"></i></a>
+
+        </div>
+    </div>
+</div>
+
+
+<table class="table table-striped">
+
+    <thead>
+        <tr>
+            <th>
+                ItemID
+            </th>
+            <th>
+                Navn
+            </th>
+            <th>
+                Pris
+            </th>
+            <th>
+                Antall
+            </th>
+            <th>Sum</th>
+            <th>Fjern</th>
+
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+
+            <tr class="itemRow">
+
+                <td>@item.ID</td>
+                <td>@item.Name</td>
+                <td>@item.Price kr</td>
+                <td>@Model.getItemQuantity(item).Value stk</td>
+                <td>@Model.getItemQuantity(item).getTotalValue() kr</td>
+                <td><button class="btn btn-danger editOrderRemove" data-userid="@Model.user.ID" data-itemid="@item.ID"><i class="fa fa-remove "></i></button></td>
+
+            </tr>
+
+
+        }
+
+    </tbody>
+</table>
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script>
+
+    $('.editOrderRemove').click(function () {
+
+        var data_itemid = $(this).data('itemid');
+        var data_userid = $(this).data('userid');
+        var itemRow = $(this).parents('.itemRow');
+        console.log(itemRow);
+
+        console.log("clicked removeButton");
+        $.ajax({
+
+            url: '@Url.Action("RemoveItem","Orders")',
+            dataType: "JSON",
+            data: {
+                itemid: data_itemid,
+                userid: data_userid
+            },
+            success: function (data) {
+                console.log(data);
+
+                itemRow.remove();
+                $("#totalItemPrice").text(data.totalPrice + ' kr');
+                $("#totalPrice").text(data.totalPrice + ' kr');
+
+
+
+            },
+            error: function (data) {
+                console.log(data);
+            },
+        })
+    })
+</script>

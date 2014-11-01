@@ -30,34 +30,35 @@ Totalpris
      
     </tr>
 
-    @foreach (var item in Model)
+    @foreach (var order in Model)
     {
         <tr>
             <td>
-                @item.ID
+                @order.ID
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Status)
+                @Html.DisplayFor(modelItem => order.Status)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Ordered)
+                @Html.DisplayFor(modelItem => order.Ordered)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Delivered)
+                @Html.DisplayFor(modelItem => order.Delivered)
             </td>
+            
             <td>
-                @if (item.Items != null)
+                @if (order.Items != null)
                 {
-                    foreach (var unit in item.Items)
+                    foreach (var item in order.Items)
                     {
-                        <p>@unit.ItemCategory.Name:  @unit.Name:  @unit.Price kr</p>
+                        <p>@order.getItemQuantity(item).Value stk @item.Name til kr @item.Price,- Sum: @order.getItemQuantity(item).getTotalValue()</p>
                         
 
                     }
                 }
             </td>
             <td>
-                @item.getTotalPrice() kr
+                @order.getTotalPrice() kr
             </td>
  
         </tr>

@@ -26,9 +26,21 @@
         </div>
 
         <div class="form-group">
+            @Html.LabelFor(model => model.user.Username, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+
+
+                <input class="form-control valid" id="user" type="text" value="@Model.user.Username" name="Username" readonly="">
+                @Html.ValidationMessageFor(model => model.user, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
             @Html.LabelFor(model => model.Ordered, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Ordered, new { htmlAttributes = new { @class = "form-control" } })
+
+                
+                @Html.TextBoxFor(model => model.Ordered, htmlAttributes: new { @class = "form-control datepicker", @data_val="false" ,placeholder = "Enter Drop-off date here...", data_date_format="DD.MM.YYYY HH:mm:ss"  })
                 @Html.ValidationMessageFor(model => model.Ordered, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -36,23 +48,104 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Delivered, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Delivered, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.TextBoxFor(model => model.Delivered, htmlAttributes: new { @class = "form-control datepicker", @data_val = "false", placeholder = "Enter Drop-off date here...", data_date_format = "DD.MM.YYYY HH:mm:ss" })
                 @Html.ValidationMessageFor(model => model.Delivered, "", new { @class = "text-danger" })
             </div>
         </div>
+    
 
         <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
+            <div class="col col-md-2">
+                <a href="@Url.Action("Index")" class="btn btn-default">Tilbake til Ordreoversikt</a>
+            </div>
+            <div class="col col-md-10 ">
+                <input type="submit" value="Lagre" class="btn btn-primary pull-right" />
             </div>
         </div>
+        
     </div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
+
+<table class="table table-striped">
+
+    <thead>
+        <tr>
+            <th>
+                ItemID
+            </th>
+            <th>
+                Navn
+            </th>
+            <th>
+                Pris
+            </th>
+            <th>
+                Antall
+            </th>
+            <th>Sum</th>
+            <th>Fjern</th>
+
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+
+            <tr class="itemRow">
+
+                <td>@item.ID</td>
+                <td>@item.Name</td>
+                <td>@item.Price kr</td>
+                <td>@Model.getItemQuantity(item).Value stk</td>
+                <td>@Model.getItemQuantity(item).getTotalValue() kr</td>
+                <td><button class="btn btn-danger editOrderRemove" data-userid="@Model.user.ID" data-itemid="@item.ID"><i class="fa fa-remove "></i></button></td>
+
+            </tr>
+
+
+        }
+
+    </tbody>
+</table>
+
+
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 }
+
+<script>
+
+    $('.editOrderRemove').click(function () {
+
+        var data_itemid = $(this).data('itemid');
+        var data_userid = $(this).data('userid');
+        var itemRow = $(this).parents('.itemRow');
+        console.log(itemRow);
+
+        console.log("clicked removeButton");
+        $.ajax({
+
+            url: '@Url.Action("RemoveItem","Orders")',
+            dataType: "JSON",
+            data: {
+                itemid: data_itemid,
+                userid: data_userid
+            },
+            success: function (data) {
+                console.log(data);
+
+                itemRow.remove();
+                $("#totalPrice").text(data.totalPrice);
+
+
+
+            },
+            error: function (data) {
+                console.log(data);
+            },
+        })
+    })
+</script>

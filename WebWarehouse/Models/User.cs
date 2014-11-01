@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebWarehouse.Models
@@ -15,6 +16,8 @@ namespace WebWarehouse.Models
 
         [Required]
         public string Password { get; set; }
+
+        public String Birthdate { get; set; }
 
         public UserRole Role { get; set; }
 
