@@ -28,11 +28,11 @@ else
                 @Html.DisplayNameFor(model => model.Price)
             </th>
 
-@if (ViewBag.LoggedInn == true)
+            @if (ViewBag.LoggedInn == true)
 {
-    <th>Kjøp</th>
+                <th>Kjøp</th>
 }
-           
+
         </tr>
 
         @foreach (var item in Model)
@@ -46,16 +46,72 @@ else
                     @Html.DisplayFor(modelItem => item.Price)
                 </td>
 
-               @if (ViewBag.LoggedInn == true)
+                @if (ViewBag.LoggedInn == true)
 {
-                <td>
-                    <a href="#">
-                        <i class="fa fa-shopping-cart fa-2x"></i>
-                    </a>
-                </td>
-               }
-            </tr>
-        }
+                    <td>
+                        <button type="button" class="btn btn-primary addToCart" data-itemid="@item.ID" data-userid="@ViewBag.UserID">
+                            <i class=" fa fa-shopping-cart fa-2x">
+                            </i>
+                        </button>
+                      
+                    </td>
+                    }
+                </tr>
+                }
 
-    </table>
-}
+            </table>
+            }
+
+
+<script>
+
+    $('.addToCart').click(function () {
+
+        var data_itemid = $(this).data('itemid');
+        var data_userid = $(this).data('userid');
+
+        console.log("clicked orderbutton");
+        $.ajax({
+            
+            url: '@Url.Action("AddItem","Orders")',
+            dataType: "JSON",
+            data: {
+                itemid: data_itemid,
+                userid: data_userid
+            },
+            success: function (data) {
+
+                if (data.error == 'none') {
+                    new PNotify({
+                        title: 'Vare lagt til i handlekurven',
+                        text: 'Du har lagt til ' + data.itemName + ' i handlekurven. Ny totalpris er: ' + data.totalPrice + ' kr',
+                        type: "success",
+                        addclass: "stack-topleft",
+                        stack: stack_topleft
+                    });
+                } else if (data.error != 'none') {
+                    new PNotify({
+                        title: 'Feil!',
+                        text: 'Noe feil skjedde når du prøvde å legge til varen i handlekurven: ' + data.error,
+                        type: "error",
+                        addclass: "stack-topleft",
+                        stack: stack_topleft
+                    });
+                } else {
+                    new PNotify({
+                        title: 'Feil!',
+                        text: 'OOOPS!: ' + data.error,
+                        type: "error",
+                        addclass: "stack-topleft",
+                        stack: stack_topleft
+                    });
+                }
+                          
+       
+            },
+            error: function (data) {
+                console.log(data);
+            },
+        })
+    });
+</script>

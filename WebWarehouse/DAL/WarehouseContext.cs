@@ -9,6 +9,8 @@ namespace WebWarehouse.DAL
         public WarehouseContext()
             : base("WarehouseContext")
         {
+            this.Configuration.LazyLoadingEnabled = true;
+            
         }
 
         public DbSet<User> Users { get; set; }
@@ -20,6 +22,7 @@ namespace WebWarehouse.DAL
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+            
         }
     }
 }

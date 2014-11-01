@@ -10,15 +10,7 @@ namespace WebWarehouse.DAL
     {
         protected override void Seed(WarehouseContext context)
         {
-            var users = new List<User>
-            {
-                new User{Username="asdf",Password=hash("asdf"),Address="asdf",  Role = UserRole.Admin},
-                new User{Username="qwer",Password=hash("qwer"),Address="qwer", Role = UserRole.Customer},
 
-            
-            };
-            users.ForEach(u => context.Users.Add(u));
-            context.SaveChanges();
 
             var itemCateogories = new List<ItemCategory>{
                 new ItemCategory{Name="Klær"},
@@ -40,11 +32,28 @@ namespace WebWarehouse.DAL
             items.ForEach(i => context.Items.Add(i));
             context.SaveChanges();
 
-            //var orders = new List<Order>{
-            //    new Order{ordered=new DateTime(), delivered=new DateTime(),status=OrderEnum.Ordered}
-            //};
-            //orders.ForEach(o => context.Orders.Add(o));
-            //context.SaveChanges();
+
+            
+
+
+            var orders = new List<Order>{
+                new Order{Ordered=DateTime.Parse("2014-04-04"), Delivered=DateTime.Parse("2014-05-05"),Status=OrderEnum.Ordered, Items=items}
+            };
+            var users = new List<User>
+            {
+                new User{Username="asdf",Password=hash("asdf"),Address="asdf",  Role = UserRole.Admin , Orders = orders},
+                new User{Username="qwer",Password=hash("qwer"),Address="qwer", Role = UserRole.Customer},
+
+            
+            };
+            users.ForEach(u => context.Users.Add(u));
+            context.SaveChanges();
+
+
+
+           
+
+
 
 
         

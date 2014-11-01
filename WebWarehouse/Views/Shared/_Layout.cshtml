@@ -6,6 +6,10 @@
     <title>@ViewBag.Title - WebWarehouse</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/custom")
+    @RenderSection("scripts", required: false)
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -25,7 +29,8 @@
                 {<ul class="nav navbar-nav">
                     <li><a href="@Url.Action("Index","Users")"><i class="fa fa-list fa-fw"></i>List Alle Brukere</a></li>
                      <li><a href="@Url.Action("Index","ItemCategories")"><i class="fa fa-list fa-fw"></i>List Alle Kategorier</a></li>
-                     <li><a href="@Url.Action("Index","Users")"><i class="fa fa-list fa-fw"></i>List Alle Varer</a></li>
+                     <li><a href="@Url.Action("Index","Items")"><i class="fa fa-list fa-fw"></i>List Alle Varer</a></li>
+                     <li><a href="@Url.Action("Index","Orders")"><i class="fa fa-list fa-fw"></i>List Alle Odre</a></li>
                 </ul>
                 }
 
@@ -33,14 +38,18 @@
                 <ul class="nav navbar-nav pull-right">
                     @if (ViewBag.LoggedInn == true)
                     {
-                    //Public menu showed if logged in.
-                        <li><a href="#"><i class="fa fa-shopping-cart fa-fw"></i>Vis Handleliste</a></li>
+                        if (ViewBag.Role.Equals("Customer"))
+                        {
+                              <li><a id="showCart" href="#"><i class="fa fa-shopping-cart fa-fw"></i>Vis Handleliste</a></li>
+                        }
+                      
+                        //Public menu showed if logged in.
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user fa-fw"></i>Min  Bruker<span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li><a href="@Url.Action("Edit", "Users", new { id = @ViewBag.UserID })"><i class="fa fa-pencil fa-fw"></i> Rediger</a></li>
-                                <li><a href="@Url.Action("Delete", "Users")"><i class="fa fa-trash-o fa-fw"></i> Slett</a></li>
-                                <li><a href="@Url.Action("ListAll", "Orders", new { id = @ViewBag.UserID})"><i class="fa fa-ban fa-fw"></i> Min Ordrehistorikk</a></li>
+                                <li><a href="@Url.Action("Delete", "Users", new { id = @ViewBag.UserID})"><i class="fa fa-trash-o fa-fw"></i> Slett</a></li>
+                                <li><a href="@Url.Action("ListAllOrders", "Users", new { id = @ViewBag.UserID})"><i class="fa fa-ban fa-fw"></i> Min Ordrehistorikk</a></li>
                                 <li><a href="#"><i class="fa fa-ban fa-fw"></i> Gi admin rettigheter  (demo-friendly)</a></li>
                                 <li class="divider"></li>
                                 <li><a href="@Url.Action("Logout", "Users")"><i class="fa fa-sign-out fa-fw"></i> Logg ut</a></li>
@@ -68,15 +77,30 @@
             <p>&copy; @DateTime.Now.Year - WebWarehouse</p>
         </footer>
         <div id="globalMessages" data-error="@ViewBag.ErrorMessage" data-success="@ViewBag.SuccessMessage" data-info="@ViewBag.InfoMessage" />
-
+   
     </div>
+    <div class="modal fade" id="shoppingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-url="@Url.Action("ActiveOrder", "Orders", new { id = @ViewBag.UserID})">
+        <div id="shoppingCart" class="modal-dialog">
+        </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#showCart').click(function () {
+                var url = $('#shoppingModal').data('url');
+
+                $.get(url, function (data) {
+                    $('#shoppingCart').html(data);
+
+                    $('#shoppingModal').modal('show');
+                });
+            });
+        });
+
+    </script>
 
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @Scripts.Render("~/bundles/custom")
-    @RenderSection("scripts", required: false)
 
+    
     
 
 </body>

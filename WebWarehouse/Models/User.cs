@@ -8,20 +8,17 @@ namespace WebWarehouse.Models
 {
     public class User
     {
+        [Key]
         public int ID { get; set; }
         [Required]
         public string Username { get; set; }
         [Required]
         public string Password { get; set; }
-
         [StringLength(50)]
         public string Address { get; set; }
-
-        
-
         public UserRole Role { get; set; }
 
-
+                
         public virtual ICollection<Order> Orders { get; set; }
     }
 }
