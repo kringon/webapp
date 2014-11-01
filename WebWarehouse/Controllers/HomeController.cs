@@ -17,7 +17,6 @@ namespace WebWarehouse.Controllers
             CheckLoginStatus();
             addCustomMessages();
 
-
             return View(db.ItemCategorys.ToList());
         }
 

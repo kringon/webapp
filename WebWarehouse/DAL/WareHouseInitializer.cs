@@ -1,25 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using WebWarehouse.Models;
 
 namespace WebWarehouse.DAL
 {
-    public class WareHouseInitializer : System.Data.Entity.DropCreateDatabaseIfModelChanges<WarehouseContext>
+    public class WareHouseInitializer : System.Data.Entity.DropCreateDatabaseAlways<WarehouseContext>
     {
         protected override void Seed(WarehouseContext context)
         {
-            var users = new List<User>
-            {
-                new User{Username="asdf",Password=hash("asdf"),Address="asdf",  Role = UserRole.Admin},
-                new User{Username="qwer",Password=hash("qwer"),Address="qwer", Role = UserRole.Customer},
-
-            
-            };
-            users.ForEach(u => context.Users.Add(u));
-            context.SaveChanges();
-
             var itemCateogories = new List<ItemCategory>{
                 new ItemCategory{Name="Klær"},
                 new ItemCategory{Name="Biler"},
@@ -39,15 +27,21 @@ namespace WebWarehouse.DAL
             };
             items.ForEach(i => context.Items.Add(i));
             context.SaveChanges();
+            var numberOfItems = new List<ItemQuantity>();
 
-            //var orders = new List<Order>{
-            //    new Order{ordered=new DateTime(), delivered=new DateTime(),status=OrderEnum.Ordered}
-            //};
-            //orders.ForEach(o => context.Orders.Add(o));
-            //context.SaveChanges();
-
-
-        
+            items.ForEach(i => numberOfItems.Add(new ItemQuantity() { Value=1, Item=i}));
+            
+            
+            var orders = new List<Order>{
+                new Order{Ordered=DateTime.Parse("2014-04-04"), Delivered=DateTime.Parse("2014-05-05"),Status=OrderEnum.Ordered, Items=items,ItemQuantities=numberOfItems}
+            };
+            var users = new List<User>
+            {
+                new User{Username="asdf",Password=hash("asdf"),Address="asdf",  Role = UserRole.Admin , Orders = orders},
+                new User{Username="qwer",Password=hash("qwer"),Address="qwer", Role = UserRole.Customer},
+            };
+            users.ForEach(u => context.Users.Add(u));
+            context.SaveChanges();
         }
 
         private String hash(string password)
@@ -55,9 +49,6 @@ namespace WebWarehouse.DAL
             var algoritme = System.Security.Cryptography.SHA256.Create();
             byte[] data = System.Text.Encoding.ASCII.GetBytes(password);
             return Convert.ToBase64String(algoritme.ComputeHash(data));
-
         }
-
-
     }
 }

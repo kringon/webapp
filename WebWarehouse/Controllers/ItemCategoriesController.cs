@@ -7,39 +7,37 @@ using WebWarehouse.Models;
 
 namespace WebWarehouse.Controllers
 {
-    public class ItemsController : MyController
+    public class ItemCategoriesController : MyController
     {
         private WarehouseContext db = new WarehouseContext();
 
-        // GET: Items/Create
+        // GET: ItemCategories/Create
         public ActionResult Create()
         {
             CheckLoginStatus();
             addCustomMessages();
-            ViewBag.ItemCategoryID = new SelectList(db.ItemCategorys, "ID", "Name");
             return View();
         }
 
-        // POST: Items/Create To protect from overposting attacks, please enable the specific
-        // properties you want to bind to, for more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: ItemCategories/Create To protect from overposting attacks, please enable the
+        // specific properties you want to bind to, for more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,ItemCategoryID,Name,Price")] Item item)
+        public ActionResult Create([Bind(Include = "ID,Name")] ItemCategory itemCategory)
         {
             CheckLoginStatus();
             addCustomMessages();
             if (ModelState.IsValid)
             {
-                db.Items.Add(item);
+                db.ItemCategorys.Add(itemCategory);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.ItemCategoryID = new SelectList(db.ItemCategorys, "ID", "Name", item.ItemCategoryID);
-            return View(item);
+            return View(itemCategory);
         }
 
-        // GET: Items/Delete/5
+        // GET: ItemCategories/Delete/5
         public ActionResult Delete(int? id)
         {
             CheckLoginStatus();
@@ -48,26 +46,26 @@ namespace WebWarehouse.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Item item = db.Items.Find(id);
-            if (item == null)
+            ItemCategory itemCategory = db.ItemCategorys.Find(id);
+            if (itemCategory == null)
             {
                 return HttpNotFound();
             }
-            return View(item);
+            return View(itemCategory);
         }
 
-        // POST: Items/Delete/5
+        // POST: ItemCategories/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Item item = db.Items.Find(id);
-            db.Items.Remove(item);
+            ItemCategory itemCategory = db.ItemCategorys.Find(id);
+            db.ItemCategorys.Remove(itemCategory);
             db.SaveChanges();
             return RedirectToAction("Index");
         }
 
-        // GET: Items/Details/5
+        // GET: ItemCategories/Details/5
         public ActionResult Details(int? id)
         {
             CheckLoginStatus();
@@ -76,15 +74,15 @@ namespace WebWarehouse.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Item item = db.Items.Find(id);
-            if (item == null)
+            ItemCategory itemCategory = db.ItemCategorys.Find(id);
+            if (itemCategory == null)
             {
                 return HttpNotFound();
             }
-            return View(item);
+            return View(itemCategory);
         }
 
-        // GET: Items/Edit/5
+        // GET: ItemCategories/Edit/5
         public ActionResult Edit(int? id)
         {
             CheckLoginStatus();
@@ -93,50 +91,37 @@ namespace WebWarehouse.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Item item = db.Items.Find(id);
-            if (item == null)
+            ItemCategory itemCategory = db.ItemCategorys.Find(id);
+            if (itemCategory == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.ItemCategoryID = new SelectList(db.ItemCategorys, "ID", "Name", item.ItemCategoryID);
-            return View(item);
+            return View(itemCategory);
         }
 
-        // POST: Items/Edit/5 To protect from overposting attacks, please enable the specific
-        // properties you want to bind to, for more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: ItemCategories/Edit/5 To protect from overposting attacks, please enable the
+        // specific properties you want to bind to, for more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,ItemCategoryID,Name,Price")] Item item)
+        public ActionResult Edit([Bind(Include = "ID,Name")] ItemCategory itemCategory)
         {
             CheckLoginStatus();
             addCustomMessages();
             if (ModelState.IsValid)
             {
-                db.Entry(item).State = EntityState.Modified;
+                db.Entry(itemCategory).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.ItemCategoryID = new SelectList(db.ItemCategorys, "ID", "Name", item.ItemCategoryID);
-            return View(item);
+            return View(itemCategory);
         }
 
-        // GET: Items
+        // GET: ItemCategories
         public ActionResult Index()
         {
             CheckLoginStatus();
             addCustomMessages();
-            var items = db.Items.Include(i => i.ItemCategory);
-            return View(items.ToList());
-        }
-
-        public ActionResult ListByCategory(int id)
-        {
-            CheckLoginStatus();
-            addCustomMessages();
-            var Items = db.Items.Where(x => x.ItemCategoryID == id);
-
-            ViewBag.CategoryName = db.ItemCategorys.Find(id).Name;
-            return View("List", Items);
+            return View(db.ItemCategorys.ToList());
         }
 
         protected override void Dispose(bool disposing)

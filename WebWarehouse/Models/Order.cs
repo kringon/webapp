@@ -1,31 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebWarehouse.Models
 {
-
     public enum OrderEnum
     {
-        Picked,Ordered,Payed,Shipped,Delivered
+        Empty, Browsing, Ordered, Payed, Shipped, Delivered
     }
+
     public class Order
     {
+        [DisplayFormat(DataFormatString = "{0:dd MMM yyyy}")]
+        public DateTime? Delivered { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:dd MMM yyyy}")]
+        public DateTime? Ordered { get; set; }
+
+        [Key]
         public int ID { get; set; }
-        public OrderEnum status { get; set; }
-        public DateTime ordered { get; set; }
-        public DateTime delivered { get; set; }
+
+        public virtual User user { get; set; }
+
         public virtual ICollection<Item> Items { get; set; }
 
-        public decimal getTotalPrice(){
+        public virtual ICollection<ItemQuantity> ItemQuantities { get; set; }
+
+        public OrderEnum Status { get; set; }
+
+        public decimal getTotalPrice()
+        {
             decimal total = 0;
-            foreach(var item in Items){
-                total += item.Price;
+            foreach (var item in Items)
+            {
+                int value = getItemQuantity(item).Value;
+                total += item.Price * value;
             }
 
             return total;
+        }
+
+        public ItemQuantity getItemQuantity(Item item)
+        {
+            foreach (ItemQuantity itemQuantity in ItemQuantities)
+            {
+                if (itemQuantity.Item.Equals(item))
+                {
+                    return itemQuantity;
+                }
+            }
+            return null;
         }
     }
 }
