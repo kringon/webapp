@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using WebWarehouse.Models;
 
 namespace WebWarehouse.DAL
@@ -10,8 +8,6 @@ namespace WebWarehouse.DAL
     {
         protected override void Seed(WarehouseContext context)
         {
-
-
             var itemCateogories = new List<ItemCategory>{
                 new ItemCategory{Name="Klær"},
                 new ItemCategory{Name="Biler"},
@@ -32,10 +28,6 @@ namespace WebWarehouse.DAL
             items.ForEach(i => context.Items.Add(i));
             context.SaveChanges();
 
-
-            
-
-
             var orders = new List<Order>{
                 new Order{Ordered=DateTime.Parse("2014-04-04"), Delivered=DateTime.Parse("2014-05-05"),Status=OrderEnum.Ordered, Items=items}
             };
@@ -43,20 +35,9 @@ namespace WebWarehouse.DAL
             {
                 new User{Username="asdf",Password=hash("asdf"),Address="asdf",  Role = UserRole.Admin , Orders = orders},
                 new User{Username="qwer",Password=hash("qwer"),Address="qwer", Role = UserRole.Customer},
-
-            
             };
             users.ForEach(u => context.Users.Add(u));
             context.SaveChanges();
-
-
-
-           
-
-
-
-
-        
         }
 
         private String hash(string password)
@@ -64,9 +45,6 @@ namespace WebWarehouse.DAL
             var algoritme = System.Security.Cryptography.SHA256.Create();
             byte[] data = System.Text.Encoding.ASCII.GetBytes(password);
             return Convert.ToBase64String(algoritme.ComputeHash(data));
-
         }
-
-
     }
 }

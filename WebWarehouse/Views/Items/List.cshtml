@@ -4,12 +4,7 @@
     ViewBag.Title = "List";
 }
 
-
-
 <h2>@ViewBag.CategoryName</h2>
-
-
-
 
 @if (Model.ToList().Count == 0)
 {
@@ -29,10 +24,9 @@ else
             </th>
 
             @if (ViewBag.LoggedInn == true)
-{
+            {
                 <th>Kjøp</th>
-}
-
+            }
         </tr>
 
         @foreach (var item in Model)
@@ -47,21 +41,18 @@ else
                 </td>
 
                 @if (ViewBag.LoggedInn == true)
-{
+                {
                     <td>
                         <button type="button" class="btn btn-primary addToCart" data-itemid="@item.ID" data-userid="@ViewBag.UserID">
                             <i class=" fa fa-shopping-cart fa-2x">
                             </i>
                         </button>
-                      
                     </td>
-                    }
-                </tr>
                 }
-
-            </table>
-            }
-
+            </tr>
+        }
+    </table>
+}
 
 <script>
 
@@ -72,7 +63,7 @@ else
 
         console.log("clicked orderbutton");
         $.ajax({
-            
+
             url: '@Url.Action("AddItem","Orders")',
             dataType: "JSON",
             data: {
@@ -106,8 +97,7 @@ else
                         stack: stack_topleft
                     });
                 }
-                          
-       
+
             },
             error: function (data) {
                 console.log(data);

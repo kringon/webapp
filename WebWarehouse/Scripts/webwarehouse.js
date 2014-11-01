@@ -4,10 +4,8 @@ PNotify.prototype.options.styling = "fontawesome";
 var stack_topleft = { "dir1": "down", "dir2": "right", "push": "top" };
 var stack_bottomleft = { "dir1": "right", "dir2": "up", "push": "top" };
 
-
 $(function () {
-
-    //Display error-alerts    
+    //Display error-alerts
     var errorMessage = $("#globalMessages").data('error');
     if (errorMessage) {
         new PNotify({
@@ -16,8 +14,6 @@ $(function () {
             type: "error",
             addclass: "stack-bottomleft",
             stack: stack_bottomleft
-
-
         });
     }
     var successMessage = $("#globalMessages").data('success');
@@ -28,8 +24,6 @@ $(function () {
             type: "success",
             addclass: "stack-bottomleft",
             stack: stack_bottomleft
-
-
         });
     }
 
@@ -41,8 +35,6 @@ $(function () {
             type: "info",
             addclass: "stack-bottomleft",
             stack: stack_bottomleft
-
-
         });
     }
 });
@@ -50,11 +42,5 @@ $(function () {
 //JS for initialising date-timepicker on create/edit-view for user
 $(function () {
     $('#birthDateTime').datetimepicker({
-      
     });
 });
-
-
-
-
-
