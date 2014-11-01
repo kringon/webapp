@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using WebWarehouse.DAL;
 using WebWarehouse.Models;
@@ -23,6 +20,8 @@ namespace WebWarehouse.Controllers
             return View(db.Orders.ToList());
         }
 
+
+   
         public ActionResult RemoveItem(int? itemid, int? userid)
         {
 
@@ -85,7 +84,7 @@ namespace WebWarehouse.Controllers
                 Order order = user.Orders.FirstOrDefault(o => o.Status == OrderEnum.Browsing || o.Status == OrderEnum.Empty);
 
 
-                if (order == null )
+                if (order == null)
                 {
                     order = new Order();
                     order.Status = OrderEnum.Empty;
@@ -94,7 +93,7 @@ namespace WebWarehouse.Controllers
                     user.Orders.Add(order);
                     db.Entry(user).State = EntityState.Modified;
                     db.SaveChanges();
-                 
+
 
                 }
 
@@ -116,7 +115,7 @@ namespace WebWarehouse.Controllers
 
         }
 
-       
+
 
         [HttpGet]
         public ActionResult ActiveOrder(int? id)
@@ -146,8 +145,8 @@ namespace WebWarehouse.Controllers
             {
                 return PartialView(browsingOrder);
             }
-            
-            return PartialView("ActiveOrder",emptyOrder);
+
+            return PartialView("ActiveOrder", emptyOrder);
 
 
         }
