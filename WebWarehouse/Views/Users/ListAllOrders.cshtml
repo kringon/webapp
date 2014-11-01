@@ -1,0 +1,66 @@
+﻿@model IEnumerable<WebWarehouse.Models.Order>
+
+@{
+    ViewBag.Title = "ListAllOrders";
+}
+
+<h2>Alle mine ordre</h2>
+
+<table class="table table-striped table-bordered table-condensed">
+    <tr>
+        <th>
+           OrderNumber
+        </th><th>
+            @Html.DisplayNameFor(model => model.Status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Ordered)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Delivered)
+        </th>
+        <th>
+            Items
+        </th>
+        <th>
+Totalpris
+        </th>
+
+
+     
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @item.ID
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Ordered)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Delivered)
+            </td>
+            <td>
+                @if (item.Items != null)
+                {
+                    foreach (var unit in item.Items)
+                    {
+                        <p>@unit.ItemCategory.Name:  @unit.Name:  @unit.Price kr</p>
+                        
+
+                    }
+                }
+            </td>
+            <td>
+                @item.getTotalPrice() kr
+            </td>
+ 
+        </tr>
+    }
+
+</table>

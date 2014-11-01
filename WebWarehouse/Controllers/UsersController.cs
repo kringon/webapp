@@ -15,7 +15,6 @@ namespace WebWarehouse.Controllers
     {
         private WarehouseContext db = new WarehouseContext();
 
-
         public ActionResult Logout()
         {
             Session["LoggedInn"] = false;
@@ -48,9 +47,9 @@ namespace WebWarehouse.Controllers
                 Session["LoggedInn"] = true;
                 Session["UserId"] = existingUser.ID;
                 Session["Role"] = existingUser.Role.ToString();
-                
-                
-                TempData["SuccessMessage"] = "Du er nå logget inn med bruker ID: "  + existingUser.ID + " Role: " + existingUser.Role;
+
+
+                TempData["SuccessMessage"] = "Du er nå logget inn med bruker ID: " + existingUser.ID + " Role: " + existingUser.Role;
 
                 return RedirectToAction("Index", "Home");
             }
@@ -58,22 +57,41 @@ namespace WebWarehouse.Controllers
             {
                 Session["LoggedInn"] = false;
                 Session["Role"] = UserRole.Unknown.ToString();
+                ViewBag.Role = UserRole.Unknown.ToString();
                 ViewBag.ErrorMessage = "Du skrev ikke inn riktige verdier. Prøv på nytt.";
                 return View();
             }
         }
+        //Get all the orders for a single user
+        public ActionResult listAllOrders(int? id)
+        {
+            CheckLoginStatus();
+            addCustomMessages();
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            User user = db.Users.Find(id);
 
 
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+            return View(user.Orders);
+
+
+        }
         // GET: Users
         public ActionResult Index()
         {
-     
+
             addCustomMessages();
             if (CheckLoginStatus())
                 return View(db.Users.ToList());
             else
             {
-                TempData["ErrorMessage"] =  "Du har ikke tilgang til denne operasjonen";
+                TempData["ErrorMessage"] = "Du har ikke tilgang til denne operasjonen";
             }
             return RedirectToAction("Index", "Home");
         }
@@ -89,6 +107,8 @@ namespace WebWarehouse.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             User user = db.Users.Find(id);
+
+            
             if (user == null)
             {
                 return HttpNotFound();
@@ -109,7 +129,7 @@ namespace WebWarehouse.Controllers
                 addCustomMessages();
                 return View();
             }
-            
+
         }
 
         // POST: Users/Create
@@ -119,22 +139,22 @@ namespace WebWarehouse.Controllers
         {
             if (ModelState.IsValid)
             {
-              
 
-                    //Check if users exists to avoid multiple
-                    if (existingUser(user) != null)
-                    {
-                        TempData["ErrorMessage"] = "Det eksisterer allerede en bruker med dette brukernavnet. Vennligst velg et annet.";
-                        return RedirectToAction("Create", "Users");
-                    }
-                        
-                        
-                    user.Password = hash(user.Password);
-                    db.Users.Add(user);
-                    db.SaveChanges();
-                    TempData["SuccessMessage"] = "Gratulerer! Du har nå opprettet en ny bruker.";
-                    return RedirectToAction("Index","Home");
-           
+
+                //Check if users exists to avoid multiple
+                if (existingUser(user) != null)
+                {
+                    TempData["ErrorMessage"] = "Det eksisterer allerede en bruker med dette brukernavnet. Vennligst velg et annet.";
+                    return RedirectToAction("Create", "Users");
+                }
+
+
+                user.Password = hash(user.Password);
+                db.Users.Add(user);
+                db.SaveChanges();
+                TempData["SuccessMessage"] = "Gratulerer! Du har nå opprettet en ny bruker.";
+                return RedirectToAction("Index", "Home");
+
 
             }
 
@@ -166,10 +186,10 @@ namespace WebWarehouse.Controllers
                 }
                 return View(user);
             }
-            ViewBag.ErrorMessage="Du kan ikke redigere brukere uten å være innlogget!";
+            ViewBag.ErrorMessage = "Du kan ikke redigere brukere uten å være innlogget!";
             return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-       
-            
+
+
         }
 
         // POST: Users/Edit/5
@@ -177,14 +197,14 @@ namespace WebWarehouse.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Username,Password,Address")] User user)
+        public ActionResult Edit([Bind(Include = "ID,Username,Password,Address,Role")] User user)
         {
 
-             
+
             if (ModelState.IsValid)
             {
 
-       
+
 
                 db.Entry(user).State = EntityState.Modified;
                 db.SaveChanges();
@@ -246,7 +266,7 @@ namespace WebWarehouse.Controllers
                 return null;
 
             String pwToBeChecked = hash(user.Password);
-          
+
 
             User existingUser = db.Users.FirstOrDefault
                 (b => b.Password == pwToBeChecked && b.Username == user.Username);
@@ -261,7 +281,7 @@ namespace WebWarehouse.Controllers
         }
 
 
-     
+
     }
 
 
