@@ -4,9 +4,19 @@ using WebWarehouse.Model;
 
 namespace WebWarehouse.BLL
 {
-    public class ItemBLL
+    public class ItemBLL : IItemBLL
     {
-        private ItemDAL db = new ItemDAL();
+        private IItemRepository db;
+
+        public ItemBLL()
+        {
+            db = new ItemRepository();
+        }
+
+        public ItemBLL(IItemRepository stub)
+        {
+            db = stub;
+        }
 
         public bool Create(Item Item)
         {
@@ -18,7 +28,7 @@ namespace WebWarehouse.BLL
             return db.Delete(id);
         }
 
-        public Item Find(int? id)
+        public Item Find(int id)
         {
             return db.Find(id);
         }
@@ -28,7 +38,7 @@ namespace WebWarehouse.BLL
             return db.FindAll();
         }
 
-        public ICollection<Item> ListByCategory(int? ItemCategoryID)
+        public ICollection<Item> ListByCategory(int ItemCategoryID)
         {
             return db.ListByCategory(ItemCategoryID);
         }

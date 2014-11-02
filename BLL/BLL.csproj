@@ -44,9 +44,11 @@
   <ItemGroup>
     <Compile Include="ItemCategory\IItemCategoryBLL.cs" />
     <Compile Include="ItemCategory\ItemCategoryBLL.cs" />
-    <Compile Include="OrderBLL.cs" />
+    <Compile Include="Item\IItemBLL.cs" />
+    <Compile Include="Item\ItemBLL.cs" />
+    <Compile Include="Order\IOrderBLL.cs" />
+    <Compile Include="Order\OrderBLL.cs" />
     <Compile Include="UserBLL.cs" />
-    <Compile Include="ItemBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

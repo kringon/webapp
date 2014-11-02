@@ -7,12 +7,12 @@ using WebWarehouse.Model;
 
 namespace WebWarehouse.DAL
 {
-    public class OrderDAL
+    public class OrderRepository : IOrderRepository
     {
         private WarehouseContext Db = new WarehouseContext();
-        private ILog Logger = LogManager.GetLogger(typeof(OrderDAL));
+        private ILog Logger = LogManager.GetLogger(typeof(OrderRepository));
 
-        public Dictionary<String, String> addItem(int? itemid, int? userid)
+        public Dictionary<String, String> addItem(int itemid, int userid)
         {
             Dictionary<String, String> returnType = new Dictionary<string, string>();
 
@@ -81,14 +81,14 @@ namespace WebWarehouse.DAL
         }
 
         //Delete an Order by ID
-        public bool Delete(int Id)
+        public bool Delete(int id)
         {
             try
             {
-                Order Order = Db.Orders.Find(Id);
+                Order Order = Db.Orders.Find(id);
                 Db.Orders.Remove(Order);
                 Db.SaveChanges();
-                Logger.Info("Order with id: " + Id + " was deleted.");
+                Logger.Info("Order with id: " + id + " was deleted.");
                 return true;
             }
             catch (Exception e)
@@ -99,13 +99,13 @@ namespace WebWarehouse.DAL
         }
 
         //Find an OrderCategory by ID
-        public Order Find(int? Id)
+        public Order Find(int id)
         {
             Order Found;
             try
             {
-                Logger.Info("Searching for Order with id: " + Id);
-                Found = Db.Orders.Find(Id);
+                Logger.Info("Searching for Order with id: " + id);
+                Found = Db.Orders.Find(id);
                 return Found;
             }
             catch (Exception e)
@@ -128,7 +128,7 @@ namespace WebWarehouse.DAL
             }
         }
 
-        public Dictionary<String, String> removeItem(int? itemid, int? userid)
+        public Dictionary<String, String> removeItem(int itemid, int userid)
         {
             Dictionary<String, String> returnType = new Dictionary<string, string>();
 
@@ -167,15 +167,15 @@ namespace WebWarehouse.DAL
                 return returnType;
             }
 
-            return null;
+         
         }
 
         //Update a specific OrderCategory
-        public bool Update(Order Order)
+        public bool Update(Order order)
         {
             try
             {
-                Db.Entry(Order).State = EntityState.Modified;
+                Db.Entry(order).State = EntityState.Modified;
                 Db.SaveChanges();
                 return true;
             }

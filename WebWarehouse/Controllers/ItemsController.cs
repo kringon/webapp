@@ -7,9 +7,22 @@ namespace WebWarehouse.Controllers
 {
     public class ItemsController : MyController
     {
-        private ItemBLL bll = new ItemBLL();
-        private ItemCategoryBLL icbll = new ItemCategoryBLL();
+        private ItemBLL bll;
+        private ItemCategoryBLL icbll;
         private ILog Logger = LogManager.GetLogger(typeof(ItemsController));
+
+
+        public ItemsController()
+        {
+            bll = new ItemBLL();
+            icbll = new ItemCategoryBLL();
+        }
+
+        public ItemsController(ItemBLL stub, ItemCategoryBLL stub2)
+        {
+            bll = stub;
+            icbll = stub2;
+        }
 
         // GET: Items/Create
         public ActionResult Create()
@@ -44,18 +57,12 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: Items/Delete/5
-        public ActionResult Delete(int? Id)
+        public ActionResult Delete(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (Id == null)
-            {
-                var msg = "You must specify which Item you wish to delete";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
-            Item item = bll.Find(Id);
+
+            Item item = bll.Find(id);
             if (item == null)
             {
                 var msg = "Could not find the specified Item";
@@ -76,17 +83,11 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: Items/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which Item you wish to see";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
+
             Item Item = bll.Find(id);
             if (Item == null)
             {
@@ -99,18 +100,12 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: Items/Edit/5
-        public ActionResult Edit(int? Id)
+        public ActionResult Edit(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (Id == null)
-            {
-                var msg = "You must specify which Item you wish to edit";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
-            Item item = bll.Find(Id);
+
+            Item item = bll.Find(id);
             if (item == null)
             {
                 var msg = "You must specify which Item you wish to edit";
@@ -163,23 +158,15 @@ namespace WebWarehouse.Controllers
         //Custom method to listAllItems with a common ItemCategory
         public ActionResult ListByCategory(int itemCategoryId)
         {
-            if (itemCategoryId != null)
-            {
-                CheckLoginStatus();
-                addCustomMessages();
-                var Items = bll.ListByCategory(itemCategoryId);
 
-                ViewBag.CategoryName = icbll.Find(itemCategoryId).Name;
-                return View("List", Items);
-            }
-            else
-            {
-                var msg = "You must specify which Category you wish to see";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
-           
+            CheckLoginStatus();
+            addCustomMessages();
+            var Items = bll.ListByCategory(itemCategoryId);
+
+            ViewBag.CategoryName = icbll.Find(itemCategoryId).Name;
+            return View("List", Items);
+
+
         }
     }
 }

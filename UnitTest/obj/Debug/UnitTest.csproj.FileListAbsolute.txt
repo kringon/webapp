@@ -30,3 +30,4 @@ C:\Users\kringon\Documents\WebWarehouse\UnitTest\bin\Debug\log4net.xml
 C:\Users\kringon\Documents\WebWarehouse\UnitTest\bin\Debug\System.Web.Optimization.xml
 C:\Users\kringon\Documents\WebWarehouse\UnitTest\obj\Debug\UnitTest.dll
 C:\Users\kringon\Documents\WebWarehouse\UnitTest\obj\Debug\UnitTest.pdb
+C:\Users\kringon\Documents\WebWarehouse\UnitTest\bin\Debug\UnitTest.dll.config

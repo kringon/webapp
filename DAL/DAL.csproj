@@ -53,9 +53,13 @@
     <Compile Include="ItemCategory\IItemCategoryRepository.cs" />
     <Compile Include="ItemCategory\ItemCategoryRepository.cs" />
     <Compile Include="ItemCategory\ItemCategoryRepositoryStub.cs" />
-    <Compile Include="OrderDAL.cs" />
+    <Compile Include="Item\IItemRepository.cs" />
+    <Compile Include="Item\ItemRepository.cs" />
+    <Compile Include="Item\ItemRepositoryStub.cs" />
+    <Compile Include="Order\IOrderRepository.cs" />
+    <Compile Include="Order\OrderRepository.cs" />
+    <Compile Include="Order\OrderRepositoryStub.cs" />
     <Compile Include="UserDAL.cs" />
-    <Compile Include="ItemDAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WarehouseContext.cs" />
     <Compile Include="WareHouseInitializer.cs" />

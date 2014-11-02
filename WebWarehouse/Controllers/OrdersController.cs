@@ -9,46 +9,26 @@ namespace WebWarehouse.Controllers
 {
     public class OrdersController : MyController
     {
-        private OrderBLL bll = new OrderBLL();
+        private OrderBLL bll;
+    
+
         private ILog Logger = LogManager.GetLogger(typeof(OrdersController));
-        private UserBLL ubll = new UserBLL();
 
-        [HttpGet]
-        public ActionResult ActiveOrder(int? id)
+        public OrdersController()
         {
-            CheckLoginStatus();
-            addCustomMessages();
-            if (id == null)
-            {
-                var msg = "Something wrong happened -> Are you trying to fool the system?";
-                TempData["ErrorMessage"] = msg;
-                Logger.Error(msg);
-                return RedirectToAction("Index", "Home");
-            }
-
-            User user = ubll.Find(id);
-            Order emptyOrder = ubll.getFirstOrderByStatus(id, OrderEnum.Empty);
-            Order browsingOrder = ubll.getFirstOrderByStatus(id, OrderEnum.Browsing);
-
-            if (emptyOrder == null && browsingOrder == null)
-            {
-                Order newOrder = new Order();
-                newOrder.Items = new List<Item>();
-                user.Orders.Add(newOrder);
-
-                ubll.Update(user);
-
-                return PartialView(newOrder);
-            }
-            if (browsingOrder != null)
-            {
-                return PartialView(browsingOrder);
-            }
-
-            return PartialView("ActiveOrder", emptyOrder);
+            bll = new OrderBLL();
+       
         }
 
-        public ActionResult AddItem(int? itemid, int? userid)
+        public OrdersController(OrderBLL stub)
+        {
+            bll = stub;
+
+        }
+
+
+
+        public ActionResult AddItem(int itemid, int userid)
         {
             if (!Session["UserID"].Equals(userid))
             {
@@ -65,17 +45,11 @@ namespace WebWarehouse.Controllers
         }
 
         [HttpGet]
-        public ActionResult CheckOut(int? orderID)
+        public ActionResult CheckOut(int orderID)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (orderID == null)
-            {
-                var msg = "Something wrong happened -> Are you trying to fool the system?";
-                TempData["ErrorMessage"] = msg;
-                Logger.Error(msg);
-                return RedirectToAction("Index", "Home");
-            }
+
             Order checkoutOrder = bll.Find(orderID);
 
             if (Session["UserID"].Equals(checkoutOrder.user.ID))
@@ -133,17 +107,11 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: Orders/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which Order you wish to delete";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
+
             Order order = bll.Find(id);
             if (order == null)
             {
@@ -165,17 +133,11 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: Orders/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which Order you wish to see";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
+
             Order order = bll.Find(id);
             if (order == null)
             {
@@ -188,17 +150,11 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: Orders/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which Order you wish to edit";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
+
             Order order = bll.Find(id);
             if (order == null)
             {
@@ -248,17 +204,11 @@ namespace WebWarehouse.Controllers
         }
 
         [HttpGet]
-        public ActionResult Reciept(int? orderID)
+        public ActionResult Reciept(int orderID)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (orderID == null)
-            {
-                var msg = "Something wrong happened -> Are you trying to fool the system?";
-                TempData["ErrorMessage"] = msg;
-                Logger.Error(msg);
-                return RedirectToAction("Index", "Home");
-            }
+
 
             Order recieptOrder = bll.Find(orderID);
             if (Session["UserID"].Equals(recieptOrder.user.ID))
@@ -290,7 +240,7 @@ namespace WebWarehouse.Controllers
             }
         }
 
-        public ActionResult RemoveItem(int? itemid, int? userid)
+        public ActionResult RemoveItem(int itemid, int userid)
         {
             if (!Session["UserID"].Equals(userid) && !Session["Role"].Equals(UserRole.Admin.ToString()))
             {
