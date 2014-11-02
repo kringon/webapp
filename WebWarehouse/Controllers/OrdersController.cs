@@ -30,11 +30,15 @@ namespace WebWarehouse.Controllers
 
         public ActionResult AddItem(int itemid, int userid)
         {
-            if (!Session["UserID"].Equals(userid))
+            if (Session != null)
             {
-                //invalid userID
-                return Json(new { error = "Invalid userID" }, JsonRequestBehavior.AllowGet);
+                if (!Session["UserID"].Equals(userid))
+                {
+                    //invalid userID
+                    return Json(new { error = "Invalid userID" }, JsonRequestBehavior.AllowGet);
+                }
             }
+         
             CheckLoginStatus();
             addCustomMessages();
             if (ModelState.IsValid)
