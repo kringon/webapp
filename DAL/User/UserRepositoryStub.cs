@@ -62,9 +62,11 @@ namespace WebWarehouse.DAL
             }
             else
             {
+                List<Order> orders = new List<Order>();
                 User user = new User()
                 {
                     ID = id,
+                    Orders = orders,
                 };
 
                 return user;

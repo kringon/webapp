@@ -190,56 +190,76 @@ namespace WebWarehouse.UnitTest
 
 
         [TestMethod]
-        public void Index_show_view()
+        public void Index_denied_access()
         {
-            //Arrange
-            List<Item> excpectedResult = new List<Item>()
-            {
-               
-            };
 
             //Act
-            ViewResult result = (ViewResult)controller.Index();
-            List<Item> resultList = (List<Item>)result.Model;
+            RedirectToRouteResult result = (RedirectToRouteResult)controller.Index();
+      
+            //Assert
+            Assert.AreEqual(result.RouteName, "");
+            Assert.AreEqual(result.RouteValues["controller"], "Home");
+            Assert.AreEqual(result.RouteValues["action"], "Index");
 
+           
+        }
+
+
+
+        [TestMethod]
+        public void ListAllOrders_show_view()
+        {
+            //Arrange
+            int userId = 1;
+
+            //Act
+            ViewResult result = (ViewResult)controller.listAllOrders(userId);
+            List<Order> resultList = (List<Order>)result.Model;
             //Assert
             Assert.AreEqual(result.ViewName, "");
+            Assert.IsInstanceOfType(result.Model, typeof(List<Order>));
+            
+        }
 
-            for (int i = 0; i < resultList.Count; i++)
-            {
-                Assert.AreEqual(excpectedResult[i].Name, resultList[i].Name);
-            }
+        [TestMethod]
+        public void ListAllOrders_no_user_found()
+        {
+            //Arrange
+            int userId = 0;
+
+            //Act
+            RedirectToRouteResult result = (RedirectToRouteResult)controller.listAllOrders(userId);
+         
+            
+            //Assert
+            Assert.AreEqual(result.RouteName, "");
+            Assert.AreEqual(result.RouteValues.Values.First(), "Index");
+
+        }
+
+
+        [TestMethod]
+        public void Login_show_view()
+        {
+            //Act
+            ViewResult result = (ViewResult)controller.Login();
+            //Assert
+            Assert.AreEqual(result.ViewName, "");
+            
+
         }
 
 
 
         //[TestMethod]
-        //public void ListByCategory_show_view()
+        //public void Delete_show_view()
         //{
         //    //Arrange
-        //    int itemCategoryID = 4;
-        //    List<Item> excpectedResult = new List<Item>(){
-        //           new Item{ItemCategoryID=4, Name="Rød",Price=199.5m},
-        //        new Item{ItemCategoryID=4, Name="Grønn",Price=199.5m},
-        //        new Item{ItemCategoryID=4, Name="Blå",Price=199.5m},
-        //        new Item{ItemCategoryID=4, Name="Gul",Price=199.5m},
-        //        new Item{ItemCategoryID=4, Name="Brun",Price=199.5m},
-        //        new Item{ItemCategoryID=4, Name="Sort",Price=199.5m},
-        //        new Item{ItemCategoryID=4, Name="Hvit",Price=189.5m},
-        //    };
 
         //    //Act
-        //    ViewResult result = (ViewResult)controller.ListByCategory(itemCategoryID);
-        //    List<Item> resultList = (List<Item>)result.Model;
-        //    //Assert
-        //    Assert.AreEqual(result.ViewName, "List");
-        //    Assert.IsInstanceOfType(result.Model, typeof(List<Item>));
-        //    for (int i = 0; i < resultList.Count; i++)
-        //    {
-        //        Assert.AreEqual(excpectedResult[i].Name, resultList[i].Name);
-        //    }
-        //}
 
+        //    //Assert
+        //}
 
 
         //[TestMethod]

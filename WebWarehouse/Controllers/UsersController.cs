@@ -207,13 +207,7 @@ namespace WebWarehouse.Controllers
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which User you wish to view Orders from";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
+     
             User user = bll.Find(id);
 
             if (user == null)
