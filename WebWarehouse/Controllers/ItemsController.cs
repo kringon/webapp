@@ -161,7 +161,7 @@ namespace WebWarehouse.Controllers
         }
 
         //Custom method to listAllItems with a common ItemCategory
-        public ActionResult ListByCategory(int? itemCategoryId)
+        public ActionResult ListByCategory(int itemCategoryId)
         {
             if (itemCategoryId != null)
             {

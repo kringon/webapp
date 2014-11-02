@@ -7,10 +7,10 @@ using WebWarehouse.Model;
 
 namespace WebWarehouse.DAL
 {
-    public class ItemCategoryDAL
+    public class ItemCategoryRepository : DAL.IItemCategoryRepository
     {
         private WarehouseContext Db = new WarehouseContext();
-        private ILog Logger = LogManager.GetLogger(typeof(ItemCategoryDAL));
+        private ILog Logger = LogManager.GetLogger(typeof(ItemCategoryRepository));
 
         //Create a new Item Category from a bound item
         public bool Create(ItemCategory ItemCategory)
@@ -48,7 +48,7 @@ namespace WebWarehouse.DAL
         }
 
         //Find an ItemCategory by ID
-        public ItemCategory Find(int? Id)
+        public ItemCategory Find(int Id)
         {
             ItemCategory Found;
             try
