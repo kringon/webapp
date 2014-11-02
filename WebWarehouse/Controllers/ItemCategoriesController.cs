@@ -8,7 +8,17 @@ namespace WebWarehouse.Controllers
 {
     public class ItemCategoriesController : MyController
     {
-        private ItemCategoryBLL bll = new ItemCategoryBLL();
+        private ItemCategoryBLL bll;
+        public ItemCategoriesController()
+        {
+             bll= new ItemCategoryBLL();
+        }
+
+        public ItemCategoriesController( ItemCategoryBLL stub)
+        {
+            bll = stub;
+        }
+       
 
         private ILog Logger = LogManager.GetLogger(typeof(ItemCategoriesController));
 
@@ -40,20 +50,15 @@ namespace WebWarehouse.Controllers
             }
 
             return View(itemCategory);
+
+            
         }
 
         // GET: ItemCategories/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which ItemCategory you wish to delete";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
 
             ItemCategory itemCategory = bll.Find(id);
 
@@ -77,17 +82,11 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: ItemCategories/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which ItemCategory you wish to see";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
+       
             ItemCategory itemCategory = bll.Find(id);
             if (itemCategory == null)
             {
@@ -100,17 +99,10 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: ItemCategories/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which ItemCategory you wish to edit";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
             ItemCategory itemCategory = bll.Find(id);
             if (itemCategory == null)
             {

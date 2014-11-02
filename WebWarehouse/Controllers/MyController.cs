@@ -16,26 +16,39 @@ namespace WebWarehouse.Controllers
             {
                 ViewBag.SuccessMessage = TempData["SuccessMessage"].ToString();
             }
-            ViewBag.UserID = Session["UserID"];
+            if (Session != null)
+            {
+                ViewBag.UserID = Session["UserID"];
+            }
+            
+
+            
         }
 
         protected bool CheckLoginStatus()
         {
-            if (Session["LoggedInn"] == null)
-            {
-                Session["LoggedInn"] = false;
-                Session["Role"] = UserRole.Unknown.ToString();
-                ViewBag.LoggedInn = false;
-                ViewBag.Role = UserRole.Unknown.ToString();
-                return false;
-            }
-            else
-            {
-                ViewBag.LoggedInn = (bool)Session["LoggedInn"];
-                ViewBag.Role = Session["Role"];
 
-                return (bool)Session["LoggedInn"];
+            if (Session != null)
+            {
+                if (Session["LoggedInn"] == null)
+                {
+                    Session["LoggedInn"] = false;
+                    Session["Role"] = UserRole.Unknown.ToString();
+                    ViewBag.LoggedInn = false;
+                    ViewBag.Role = UserRole.Unknown.ToString();
+                    return false;
+                }
+                else
+                {
+                    ViewBag.LoggedInn = (bool)Session["LoggedInn"];
+                    ViewBag.Role = Session["Role"];
+
+                    return (bool)Session["LoggedInn"];
+                }
             }
+            return false;
+         
+            
         }
     }
 }

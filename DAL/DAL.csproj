@@ -50,10 +50,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ItemCategory\IItemCategoryRepository.cs" />
+    <Compile Include="ItemCategory\ItemCategoryRepositoryStub.cs" />
     <Compile Include="OrderDAL.cs" />
     <Compile Include="UserDAL.cs" />
     <Compile Include="ItemDAL.cs" />
-    <Compile Include="ItemCategoryDAL.cs" />
+    <Compile Include="ItemCategory\ItemCategoryRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WarehouseContext.cs" />
     <Compile Include="WareHouseInitializer.cs" />
