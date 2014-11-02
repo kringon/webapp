@@ -7,6 +7,7 @@ namespace WebWarehouse.Model
     public class User
     {
         [StringLength(50)]
+        [Required]
         public string Address { get; set; }
 
         [Key]

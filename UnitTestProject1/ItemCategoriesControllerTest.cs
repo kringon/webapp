@@ -7,7 +7,7 @@ using WebWarehouse.Controllers;
 using WebWarehouse.DAL;
 using WebWarehouse.Model;
 
-namespace UnitTestProject1
+namespace WebWarehouse.UnitTest
 {
     [TestClass]
     public class ItemCategoriesControllerTest

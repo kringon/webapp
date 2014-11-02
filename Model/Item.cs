@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebWarehouse.Model
 {
@@ -15,10 +16,12 @@ namespace WebWarehouse.Model
 
         public int ItemCategoryID { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
         public virtual ICollection<Order> Orders { get; set; }
 
+        [Required]
         public decimal Price { get; set; }
 
         public ItemEnum Status { get; set; }
