@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using WebWarehouse.Models;
+using WebWarehouse.Model;
 
 namespace WebWarehouse.DAL
 {
@@ -37,8 +37,8 @@ namespace WebWarehouse.DAL
             };
             var users = new List<User>
             {
-                new User{Username="asdf",Password=hash("asdf"),Address="asdf",  Role = UserRole.Admin , Orders = orders},
-                new User{Username="qwer",Password=hash("qwer"),Address="qwer", Role = UserRole.Customer},
+                new User{Username="sdfg",Password=hash("sdfg"),Address="sdfg",  Role = UserRole.Admin , Orders = orders},
+                new User{Username="wert",Password=hash("wert"),Address="wert", Role = UserRole.Customer},
             };
             users.ForEach(u => context.Users.Add(u));
             context.SaveChanges();

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WebWarehouse.Models.ItemCategory>
+﻿@model IEnumerable<WebWarehouse.Model.ItemCategory>
 
 
 @{
@@ -28,7 +28,7 @@ else
 
                     <div class="col-md-4">
                        
-                        <div class="well well-sm"><h2>@item.Name</h2><p><a href="@Url.Action("ListByCategory", "Items", new { id = item.ID})">Trykk her</a> for å se varer fra denne kategorien.</p></div>
+                        <div class="well well-sm"><h2>@item.Name</h2><p><a href="@Url.Action("ListByCategory", "Items", new { itemCategoryId = item.ID })">Trykk her</a> for å se varer fra denne kategorien.</p></div>
                     </div>
          i++;
      }

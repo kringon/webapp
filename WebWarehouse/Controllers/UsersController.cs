@@ -1,16 +1,14 @@
-﻿using System;
-using System.Data.Entity;
-using System.Linq;
-using System.Net;
+﻿using log4net;
 using System.Web.Mvc;
-using WebWarehouse.DAL;
-using WebWarehouse.Models;
+using WebWarehouse.BLL;
+using WebWarehouse.Model;
 
 namespace WebWarehouse.Controllers
 {
     public class UsersController : MyController
     {
-        private WarehouseContext db = new WarehouseContext();
+        private UserBLL bll = new UserBLL();
+        private ILog Logger = LogManager.GetLogger(typeof(UsersController));
 
         // GET: Users/Create
         public ActionResult Create()
@@ -35,17 +33,21 @@ namespace WebWarehouse.Controllers
             if (ModelState.IsValid)
             {
                 //Check if users exists to avoid multiple
-                if (existingUser(user) != null)
+                if (bll.existingUser(user) != null)
                 {
-                    TempData["ErrorMessage"] = "Det eksisterer allerede en bruker med dette brukernavnet. Vennligst velg et annet.";
+                    var msg = "Prøvde å opprette en bruker med eksisterende brukernavn. Vennligst velg et annet.";
+                    TempData["ErrorMessage"] = msg;
+                    Logger.Warn(msg);
                     return RedirectToAction("Create", "Users");
                 }
 
-                user.Password = hash(user.Password);
-                db.Users.Add(user);
-                db.SaveChanges();
-                TempData["SuccessMessage"] = "Gratulerer! Du har nå opprettet en ny bruker.";
-                return RedirectToAction("Index", "Home");
+                if (bll.Create(user))
+                {
+                    var msg = "Gratulerer! Du har nå opprettet en ny bruker med brukernavn: " + user.Username;
+                    Logger.Info(msg);
+                    TempData["SuccessMessage"] = msg;
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
             return View(user);
@@ -58,12 +60,18 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which User you wish to delete";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            User user = db.Users.Find(id);
+            User user = bll.Find(id);
             if (user == null)
             {
-                return HttpNotFound();
+                var msg = "Could not find the specified User";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(user);
         }
@@ -73,9 +81,7 @@ namespace WebWarehouse.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            User user = db.Users.Find(id);
-            db.Users.Remove(user);
-            db.SaveChanges();
+            bll.Delete(id);
             return RedirectToAction("Index");
         }
 
@@ -86,13 +92,19 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which User you wish to see";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            User user = db.Users.Find(id);
+            User user = bll.Find(id);
 
             if (user == null)
             {
-                return HttpNotFound();
+                var msg = "Cannot find the specified User -> Did you use the right link?";
+                Logger.Error(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(user);
         }
@@ -108,22 +120,28 @@ namespace WebWarehouse.Controllers
                 sessionId = (int)Session["UserID"];
                 if (id == null)
                 {
-                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                    var msg = "You must specify which User you wish to edit";
+                    Logger.Warn(msg);
+                    TempData["ErrorMessage"] = msg;
+                    return RedirectToAction("Index");
                 }
                 else if (id != sessionId)
                 {
                     TempData["ErrorMessage"] = "Du har ikke lov til å redigere andre brukere!";
                     return RedirectToAction("Index", "Home");
                 }
-                User user = db.Users.Find(id);
+                User user = bll.Find(id);
                 if (user == null)
                 {
-                    return HttpNotFound();
+                    var msg = "Cannot find the specified User -> Did you use the right link?";
+                    Logger.Error(msg);
+                    TempData["ErrorMessage"] = msg;
+                    return RedirectToAction("Index");
                 }
                 return View(user);
             }
             ViewBag.ErrorMessage = "Du kan ikke redigere brukere uten å være innlogget!";
-            return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            return RedirectToAction("Index", "Home");
         }
 
         // POST: Users/Edit/5 To protect from overposting attacks, please enable the specific
@@ -132,11 +150,25 @@ namespace WebWarehouse.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Username,Password,Address,Role")] User user)
         {
+            CheckLoginStatus();
+            addCustomMessages();
+
             if (ModelState.IsValid)
             {
-                db.Entry(user).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (bll.Update(user))
+                {
+                    var msg = "You have updated User with id: " + user.ID + " and userName: " + user.Username;
+                    Logger.Info(msg);
+                    TempData["SuccessMessage"] = msg;
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    var msg = "Updating the User with id: " + user.ID + " userName: " + user.Username + " failed.";
+                    Logger.Error(msg);
+                    TempData["ErrorMessage"] = msg;
+                    addCustomMessages();
+                }
             }
             return View(user);
         }
@@ -146,12 +178,12 @@ namespace WebWarehouse.Controllers
         {
             addCustomMessages();
             if (CheckLoginStatus())
-                return View(db.Users.ToList());
+                return View(bll.FindAll());
             else
             {
                 TempData["ErrorMessage"] = "Du har ikke tilgang til denne operasjonen";
+                return RedirectToAction("Index", "Home");
             }
-            return RedirectToAction("Index", "Home");
         }
 
         //Get all the orders for a single user
@@ -161,13 +193,19 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which User you wish to view Orders from";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            User user = db.Users.Find(id);
+            User user = bll.Find(id);
 
             if (user == null)
             {
-                return HttpNotFound();
+                var msg = "There is no user found with id: " + id;
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(user.Orders);
         }
@@ -184,14 +222,15 @@ namespace WebWarehouse.Controllers
         [HttpPost]
         public ActionResult Login(User user)
         {
-            User existingUser = this.existingUser(user);
+            User existingUser = bll.existingUser(user);
             if (existingUser != null)
             {
                 Session["LoggedInn"] = true;
                 Session["UserId"] = existingUser.ID;
                 Session["Role"] = existingUser.Role.ToString();
-
-                TempData["SuccessMessage"] = "Du er nå logget inn med bruker ID: " + existingUser.ID + " Role: " + existingUser.Role;
+                var msg = "Bruker med bruker ID: " + existingUser.ID + " Role: " + existingUser.Role + " er logget inn!";
+                TempData["SuccessMessage"] = msg;
+                Logger.Info(msg);
 
                 return RedirectToAction("Index", "Home");
             }
@@ -200,7 +239,9 @@ namespace WebWarehouse.Controllers
                 Session["LoggedInn"] = false;
                 Session["Role"] = UserRole.Unknown.ToString();
                 ViewBag.Role = UserRole.Unknown.ToString();
-                ViewBag.ErrorMessage = "Du skrev ikke inn riktige verdier. Prøv på nytt.";
+                var msg = "Brukerinnlogging feilet for brukernavn: " + user.Username;
+                ViewBag.ErrorMessage = msg;
+                Logger.Warn(msg);
                 return View();
             }
         }
@@ -208,47 +249,16 @@ namespace WebWarehouse.Controllers
         public ActionResult Logout()
         {
             Session["LoggedInn"] = false;
+            var msg = "Bruker med brukerID: " + Session["UserID"] + " logget ut.";
             Session["UserID"] = null;
             Session["Role"] = UserRole.Unknown.ToString();
             ViewBag.LoggedInn = false;
             ViewBag.Role = UserRole.Unknown.ToString();
 
+            ViewBag.SuccessMessage = msg;
+            Logger.Info(msg);
+
             return RedirectToAction("Index", "Home");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        private User existingUser(User user)
-        {
-            if (user.Password == null)
-                return null;
-
-            String pwToBeChecked = hash(user.Password);
-
-            User existingUser = db.Users.FirstOrDefault
-                (b => b.Password == pwToBeChecked && b.Username == user.Username);
-            if (existingUser == null)
-            {
-                return null;
-            }
-            else
-            {
-                return existingUser;
-            }
-        }
-
-        private String hash(string password)
-        {
-            var algoritme = System.Security.Cryptography.SHA256.Create();
-            byte[] data = System.Text.Encoding.ASCII.GetBytes(password);
-            return Convert.ToBase64String(algoritme.ComputeHash(data));
         }
     }
 }

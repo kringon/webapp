@@ -1,4 +1,4 @@
-﻿namespace WebWarehouse.Models
+﻿namespace WebWarehouse.Model
 {
     public enum UserRole
     {
@@ -12,6 +12,5 @@
         Customer,
 
         Unknown
-
     }
 }

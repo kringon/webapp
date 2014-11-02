@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace WebWarehouse.Models
+namespace WebWarehouse.Model
 {
     public class User
     {

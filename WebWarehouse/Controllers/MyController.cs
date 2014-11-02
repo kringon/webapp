@@ -1,5 +1,5 @@
 ﻿using System.Web.Mvc;
-using WebWarehouse.Models;
+using WebWarehouse.Model;
 
 namespace WebWarehouse.Controllers
 {

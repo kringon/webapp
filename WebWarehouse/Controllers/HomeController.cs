@@ -3,21 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using WebWarehouse.DAL;
+using WebWarehouse.BLL;
+
 
 namespace WebWarehouse.Controllers
 {
     public class HomeController : MyController
     {
 
-        private WarehouseContext db = new WarehouseContext();
+        private ItemCategoryBLL bll = new ItemCategoryBLL();
 
         public ActionResult Index()
         {
             CheckLoginStatus();
             addCustomMessages();
 
-            return View(db.ItemCategorys.ToList());
+            return View(bll.FindAll());
         }
 
        

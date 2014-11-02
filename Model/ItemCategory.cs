@@ -1,4 +1,4 @@
-﻿namespace WebWarehouse.Models
+﻿namespace WebWarehouse.Model
 {
     public class ItemCategory
     {

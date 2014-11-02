@@ -1,6 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
-using WebWarehouse.Models;
+using WebWarehouse.Model;
 
 namespace WebWarehouse.DAL
 {

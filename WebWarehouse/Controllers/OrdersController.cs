@@ -1,89 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Net;
+﻿using log4net;
+using System.Collections.Generic;
 using System.Web.Mvc;
-using WebWarehouse.DAL;
-using WebWarehouse.Models;
+using System.Web.Script.Serialization;
+using WebWarehouse.BLL;
+using WebWarehouse.Model;
 
 namespace WebWarehouse.Controllers
 {
     public class OrdersController : MyController
     {
-        private WarehouseContext db = new WarehouseContext();
-
-        [HttpGet]
-        public ActionResult Reciept(int? orderID)
-        {
-            CheckLoginStatus();
-            addCustomMessages();
-            if (orderID == null)
-            {
-                TempData["ErrorMessage"] = "Her har det skjedd noe galt -> Prøver du å lure systemet?";
-                return RedirectToAction("Index", "Home");
-            }
-
-            Order recieptOrder = db.Orders.Find(orderID);
-            if (Session["UserID"].Equals(recieptOrder.user.ID))
-            {
-                if (recieptOrder != null)
-                {
-                    recieptOrder.Status = OrderEnum.Payed;
-                    recieptOrder.Ordered = System.DateTime.Now;
-
-                    db.Entry(recieptOrder).State = EntityState.Modified;
-
-                    db.SaveChanges();
-                    TempData["SuccessMessage"] = "Gratulerer! Du har bestilt. Handlelisten er tømt og du kan følge bestillingen på 'Min Bruker => Min Ordrehistorikk'";
-                    addCustomMessages();
-
-                    return View(recieptOrder);
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Det finnes ikke noen ordre med den ID'en";
-                    return RedirectToAction("Index", "Home");
-                }
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Du har ikke lov til å sjekke ut den Ordren!";
-                return RedirectToAction("Index", "Home");
-            }
-        }
-
-        [HttpGet]
-        public ActionResult CheckOut(int? orderID)
-        {
-            CheckLoginStatus();
-            addCustomMessages();
-            if (orderID == null)
-            {
-                TempData["ErrorMessage"] = "Du må vite hvilken ordre du skal sjekke ut";
-                return RedirectToAction("Index", "Home");
-            }
-            Order checkoutOrder = db.Orders.Find(orderID);
-
-            if (Session["UserID"].Equals(checkoutOrder.user.ID))
-            {
-                if (checkoutOrder != null)
-                {
-                    TempData["SuccessMessage"] = "Du er nå ett steg unna å fullføre ordren";
-                    addCustomMessages();
-                    return View(checkoutOrder);
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Det finnes ikke noen ordre med den ID'en";
-                    return RedirectToAction("Index", "Home");
-                }
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Du har ikke lov til å sjekke ut den Ordren!";
-                return RedirectToAction("Index", "Home");
-            }
-        }
+        private OrderBLL bll = new OrderBLL();
+        private ILog Logger = LogManager.GetLogger(typeof(OrdersController));
+        private UserBLL ubll = new UserBLL();
 
         [HttpGet]
         public ActionResult ActiveOrder(int? id)
@@ -92,12 +20,15 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "Something wrong happened -> Are you trying to fool the system?";
+                TempData["ErrorMessage"] = msg;
+                Logger.Error(msg);
+                return RedirectToAction("Index", "Home");
             }
 
-            User user = db.Users.Find(id);
-            Order emptyOrder = user.Orders.FirstOrDefault(o => o.Status == OrderEnum.Empty);
-            Order browsingOrder = user.Orders.FirstOrDefault(o => o.Status == OrderEnum.Browsing);
+            User user = ubll.Find(id);
+            Order emptyOrder = ubll.getFirstOrderByStatus(id, OrderEnum.Empty);
+            Order browsingOrder = ubll.getFirstOrderByStatus(id, OrderEnum.Browsing);
 
             if (emptyOrder == null && browsingOrder == null)
             {
@@ -105,8 +36,7 @@ namespace WebWarehouse.Controllers
                 newOrder.Items = new List<Item>();
                 user.Orders.Add(newOrder);
 
-                db.Entry(user).State = EntityState.Modified;
-                db.SaveChanges();
+                ubll.Update(user);
 
                 return PartialView(newOrder);
             }
@@ -129,40 +59,47 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (ModelState.IsValid)
             {
-                Item item = db.Items.Find(itemid);
-                User user = db.Users.Find(userid);
-                Order order = user.Orders.FirstOrDefault(o => o.Status == OrderEnum.Browsing || o.Status == OrderEnum.Empty);
-
-                if (order == null)
-                {
-                    order = new Order();
-                    order.Status = OrderEnum.Empty;
-
-                    order.Items = new List<Item>();
-                    order.ItemQuantities = new List<ItemQuantity>();
-                    user.Orders.Add(order);
-                    db.Entry(user).State = EntityState.Modified;
-                    db.SaveChanges();
-                }
-
-                order.Items.Add(item);
-                ItemQuantity quantity = order.getItemQuantity(item);
-                if (quantity != null)
-                    quantity.Value++;
-                else
-                    order.ItemQuantities.Add(new ItemQuantity() { Value = 1, Item = item });
-
-                if (order.Status == OrderEnum.Empty)
-                    order.Status = OrderEnum.Browsing;
-
-                db.Entry(order).State = EntityState.Modified;
-                db.Entry(user).State = EntityState.Modified;
-
-                db.SaveChanges();
-
-                return Json(new { error = "none", totalPrice = order.getTotalPrice(), itemName = item.Name }, JsonRequestBehavior.AllowGet);
+                return Json(new JavaScriptSerializer().Serialize(bll.addItem(itemid, userid)), JsonRequestBehavior.AllowGet);
             }
-            return Json(new { error = "Something went wrong, dispatch monkeys to fix" });
+            return Json(new { error = "Something went wrong, dispatch monkeys to fix" }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult CheckOut(int? orderID)
+        {
+            CheckLoginStatus();
+            addCustomMessages();
+            if (orderID == null)
+            {
+                var msg = "Something wrong happened -> Are you trying to fool the system?";
+                TempData["ErrorMessage"] = msg;
+                Logger.Error(msg);
+                return RedirectToAction("Index", "Home");
+            }
+            Order checkoutOrder = bll.Find(orderID);
+
+            if (Session["UserID"].Equals(checkoutOrder.user.ID))
+            {
+                if (checkoutOrder != null)
+                {
+                    TempData["SuccessMessage"] = "You are now one step away from fulfilling your destiny!";
+                    addCustomMessages();
+                    return View(checkoutOrder);
+                }
+                else
+                {
+                    var msg = "There is no order with orderID: " + orderID;
+                    TempData["ErrorMessage"] = msg;
+                    Logger.Warn(msg);
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "You are not allowed to check out this order!";
+                Logger.Error("User with UserID: " + Session["UserId"] + " is trying to check out another users order.");
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         // GET: Orders/Create
@@ -183,9 +120,13 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (ModelState.IsValid)
             {
-                db.Orders.Add(order);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (bll.Create(order))
+                {
+                    var msg = "A new Order was created with ID: " + order.ID;
+                    Logger.Info(msg);
+                    TempData["SuccessMessage"] = msg;
+                    return RedirectToAction("Index");
+                }
             }
 
             return View(order);
@@ -198,12 +139,18 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which Order you wish to delete";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            Order order = db.Orders.Find(id);
+            Order order = bll.Find(id);
             if (order == null)
             {
-                return HttpNotFound();
+                var msg = "Could not find the specified Order";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(order);
         }
@@ -213,9 +160,7 @@ namespace WebWarehouse.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Order order = db.Orders.Find(id);
-            db.Orders.Remove(order);
-            db.SaveChanges();
+            bll.Delete(id);
             return RedirectToAction("Index");
         }
 
@@ -226,12 +171,18 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which Order you wish to see";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            Order order = db.Orders.Find(id);
+            Order order = bll.Find(id);
             if (order == null)
             {
-                return HttpNotFound();
+                var msg = "Cannot find the specified Order -> Did you use the right link?";
+                Logger.Error(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(order);
         }
@@ -243,12 +194,18 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which Order you wish to edit";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            Order order = db.Orders.Find(id);
+            Order order = bll.Find(id);
             if (order == null)
             {
-                return HttpNotFound();
+                var msg = "Cannot find the specified Order -> Did you use the right link?";
+                Logger.Error(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(order);
         }
@@ -264,9 +221,20 @@ namespace WebWarehouse.Controllers
 
             if (ModelState.IsValid)
             {
-                db.Entry(order).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (bll.Update(order))
+                {
+                    var msg = "You have updated Order with id: " + order.ID;
+                    Logger.Info(msg);
+                    TempData["SuccessMessage"] = msg;
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    var msg = "Updating the order with id: " + order.ID + " failed.";
+                    Logger.Warn(msg);
+                    TempData["ErrorMessage"] = msg;
+                    addCustomMessages();
+                }
             }
             return View(order);
         }
@@ -276,7 +244,50 @@ namespace WebWarehouse.Controllers
         {
             CheckLoginStatus();
             addCustomMessages();
-            return View(db.Orders.ToList());
+            return View(bll.FindAll());
+        }
+
+        [HttpGet]
+        public ActionResult Reciept(int? orderID)
+        {
+            CheckLoginStatus();
+            addCustomMessages();
+            if (orderID == null)
+            {
+                var msg = "Something wrong happened -> Are you trying to fool the system?";
+                TempData["ErrorMessage"] = msg;
+                Logger.Error(msg);
+                return RedirectToAction("Index", "Home");
+            }
+
+            Order recieptOrder = bll.Find(orderID);
+            if (Session["UserID"].Equals(recieptOrder.user.ID))
+            {
+                if (recieptOrder != null)
+                {
+                    recieptOrder.Status = OrderEnum.Payed;
+                    recieptOrder.Ordered = System.DateTime.Now;
+
+                    bll.Update(recieptOrder);
+                    TempData["SuccessMessage"] = "Congratulations!You have ordered. The shopping cart is emptied, and you can view your exisiting orders by clicking on the menuitem.";
+                    Logger.Info("Order with ordreID: " + recieptOrder.ID + " was successfull");
+                    addCustomMessages();
+                    return View(recieptOrder);
+                }
+                else
+                {
+                    var msg = "There is no order with orderID: " + orderID;
+                    TempData["ErrorMessage"] = msg;
+                    Logger.Warn(msg);
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "You are not allowed to check out this order!";
+                Logger.Error("User with UserID: " + Session["UserId"] + " is trying to check out another users order.");
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         public ActionResult RemoveItem(int? itemid, int? userid)
@@ -291,40 +302,9 @@ namespace WebWarehouse.Controllers
 
             if (ModelState.IsValid)
             {
-                Item item = db.Items.Find(itemid);
-                User user = db.Users.Find(userid);
-                Order order = user.Orders.FirstOrDefault(o => o.Status == OrderEnum.Browsing || o.Status == OrderEnum.Empty);
-
-                if (order == null)
-                {
-                    return Json(new { error = "Something Went Wrong during removal. Please contact administrator. ItemID:" + itemid + " UserID:" + userid }, JsonRequestBehavior.AllowGet);
-                }
-
-                order.Items.Remove(item);
-                order.ItemQuantities.Remove(order.getItemQuantity(item));
-
-                if (order.Items.Count == 0)
-                    order.Status = OrderEnum.Empty;
-
-                db.Entry(order).State = EntityState.Modified;
-                db.Entry(user).State = EntityState.Modified;
-
-                db.SaveChanges();
-
-                return Json(new { error = "none", totalPrice = order.getTotalPrice(), itemID = item.ID }, JsonRequestBehavior.AllowGet);
+                return Json(new JavaScriptSerializer().Serialize(bll.removeItem(itemid, userid)), JsonRequestBehavior.AllowGet);
             }
             return Json(new { error = "Something went wrong, dispatch monkeys to fix" });
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            CheckLoginStatus();
-            addCustomMessages();
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace WebWarehouse.Models
+namespace WebWarehouse.Model
 {
     public enum ItemEnum
     {
         Active, Inactive
     }
 
-    
     public class Item
     {
         public int ID { get; set; }
