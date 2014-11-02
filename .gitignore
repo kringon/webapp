@@ -2,3 +2,4 @@ WebWarehouse/bin/
 WebWarehouse/obj/Debug/
 WebWarehouse/App_Data/Warehouse.mdf
 WebWarehouse/App_Data/Warehouse_log.ldf
+packages/log4net.2.0.3/lib/net40-full/log4net.xml
