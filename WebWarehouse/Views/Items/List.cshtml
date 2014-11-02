@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WebWarehouse.Models.Item>
+﻿@model IEnumerable<WebWarehouse.Model.Item>
 
 @{
     ViewBag.Title = "List";
@@ -71,11 +71,12 @@ else
                 userid: data_userid
             },
             success: function (data) {
+                var data = $.parseJSON(data);
 
                 if (data.error == 'none') {
                     new PNotify({
                         title: 'Vare lagt til i handlekurven',
-                        text: 'Du har lagt til ' + data.itemName + ' i handlekurven. Ny totalpris er: ' + data.totalPrice + ' kr',
+                        text: 'Du har lagt til ' + data.ItemName + ' i handlekurven. Ny totalpris er: ' + data.TotalPrice + ' kr',
                         type: "success",
                         addclass: "stack-topleft",
                         stack: stack_topleft

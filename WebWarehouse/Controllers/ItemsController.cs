@@ -1,22 +1,22 @@
-﻿using System.Data.Entity;
-using System.Linq;
-using System.Net;
+﻿using log4net;
 using System.Web.Mvc;
-using WebWarehouse.DAL;
-using WebWarehouse.Models;
+using WebWarehouse.BLL;
+using WebWarehouse.Model;
 
 namespace WebWarehouse.Controllers
 {
     public class ItemsController : MyController
     {
-        private WarehouseContext db = new WarehouseContext();
+        private ItemBLL bll = new ItemBLL();
+        private ItemCategoryBLL icbll = new ItemCategoryBLL();
+        private ILog Logger = LogManager.GetLogger(typeof(ItemsController));
 
         // GET: Items/Create
         public ActionResult Create()
         {
             CheckLoginStatus();
             addCustomMessages();
-            ViewBag.ItemCategoryID = new SelectList(db.ItemCategorys, "ID", "Name");
+            ViewBag.ItemCategoryID = new SelectList(icbll.FindAll(), "ID", "Name");
             return View();
         }
 
@@ -24,34 +24,44 @@ namespace WebWarehouse.Controllers
         // properties you want to bind to, for more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,ItemCategoryID,Name,Price")] Item item)
+        public ActionResult Create([Bind(Include = "ID,ItemCategoryID,Name,Price")] Item Item)
         {
             CheckLoginStatus();
             addCustomMessages();
             if (ModelState.IsValid)
             {
-                db.Items.Add(item);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (bll.Create(Item))
+                {
+                    var msg = "A new Item was created with name: " + Item.Name;
+                    Logger.Info(msg);
+                    TempData["SuccessMessage"] = msg;
+                    return RedirectToAction("Index");
+                }
             }
 
-            ViewBag.ItemCategoryID = new SelectList(db.ItemCategorys, "ID", "Name", item.ItemCategoryID);
-            return View(item);
+            ViewBag.ItemCategoryID = new SelectList(icbll.FindAll(), "ID", "Name", Item.ItemCategoryID);
+            return View(Item);
         }
 
         // GET: Items/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int? Id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
+            if (Id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which Item you wish to delete";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            Item item = db.Items.Find(id);
+            Item item = bll.Find(Id);
             if (item == null)
             {
-                return HttpNotFound();
+                var msg = "Could not find the specified Item";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(item);
         }
@@ -61,9 +71,7 @@ namespace WebWarehouse.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Item item = db.Items.Find(id);
-            db.Items.Remove(item);
-            db.SaveChanges();
+            bll.Delete(id);
             return RedirectToAction("Index");
         }
 
@@ -74,31 +82,43 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which Item you wish to see";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            Item item = db.Items.Find(id);
-            if (item == null)
+            Item Item = bll.Find(id);
+            if (Item == null)
             {
-                return HttpNotFound();
+                var msg = "Cannot find the specified Item -> Did you use the right link?";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            return View(item);
+            return View(Item);
         }
 
         // GET: Items/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int? Id)
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
+            if (Id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which Item you wish to edit";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            Item item = db.Items.Find(id);
+            Item item = bll.Find(Id);
             if (item == null)
             {
-                return HttpNotFound();
+                var msg = "You must specify which Item you wish to edit";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            ViewBag.ItemCategoryID = new SelectList(db.ItemCategorys, "ID", "Name", item.ItemCategoryID);
+            ViewBag.ItemCategoryID = new SelectList(icbll.FindAll(), "ID", "Name", item.ItemCategoryID);
             return View(item);
         }
 
@@ -112,11 +132,22 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (ModelState.IsValid)
             {
-                db.Entry(item).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (bll.Update(item))
+                {
+                    var msg = "You have updated Item with id: " + item.ID;
+                    Logger.Info(msg);
+                    TempData["SuccessMessage"] = msg;
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    var msg = "Updating the Item with id: " + item.ID + " failed.";
+                    Logger.Warn(msg);
+                    TempData["ErrorMessage"] = msg;
+                    addCustomMessages();
+                }
             }
-            ViewBag.ItemCategoryID = new SelectList(db.ItemCategorys, "ID", "Name", item.ItemCategoryID);
+            ViewBag.ItemCategoryID = new SelectList(icbll.FindAll(), "ID", "Name", item.ItemCategoryID);
             return View(item);
         }
 
@@ -125,27 +156,30 @@ namespace WebWarehouse.Controllers
         {
             CheckLoginStatus();
             addCustomMessages();
-            var items = db.Items.Include(i => i.ItemCategory);
-            return View(items.ToList());
+
+            return View(bll.FindAll());
         }
 
-        public ActionResult ListByCategory(int id)
+        //Custom method to listAllItems with a common ItemCategory
+        public ActionResult ListByCategory(int? itemCategoryId)
         {
-            CheckLoginStatus();
-            addCustomMessages();
-            var Items = db.Items.Where(x => x.ItemCategoryID == id);
-
-            ViewBag.CategoryName = db.ItemCategorys.Find(id).Name;
-            return View("List", Items);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
+            if (itemCategoryId != null)
             {
-                db.Dispose();
+                CheckLoginStatus();
+                addCustomMessages();
+                var Items = bll.ListByCategory(itemCategoryId);
+
+                ViewBag.CategoryName = icbll.Find(itemCategoryId).Name;
+                return View("List", Items);
             }
-            base.Dispose(disposing);
+            else
+            {
+                var msg = "You must specify which Category you wish to see";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
+            }
+           
         }
     }
 }

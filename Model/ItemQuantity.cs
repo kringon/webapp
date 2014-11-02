@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace WebWarehouse.Models
+﻿namespace WebWarehouse.Model
 {
-    
     public class ItemQuantity
     {
         public int ID { get; set; }
 
-        public int Value { get; set; }
-
         public virtual Item Item { get; set; }
 
-        public decimal getTotalValue(){
+        public int Value { get; set; }
+
+        public decimal getTotalValue()
+        {
             return Value * Item.Price;
         }
     }

@@ -1,0 +1,13 @@
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\BLL.dll
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\BLL.pdb
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\DAL.dll
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\log4net.dll
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\Model.dll
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\EntityFramework.dll
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\DAL.pdb
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\Model.pdb
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\log4net.xml
+C:\Users\kringon\Documents\WebWarehouse\BLL\bin\Debug\EntityFramework.xml
+C:\Users\kringon\Documents\WebWarehouse\BLL\obj\Debug\BLL.csprojResolveAssemblyReference.cache
+C:\Users\kringon\Documents\WebWarehouse\BLL\obj\Debug\BLL.dll
+C:\Users\kringon\Documents\WebWarehouse\BLL\obj\Debug\BLL.pdb

@@ -1,15 +1,16 @@
-﻿using System.Data.Entity;
-using System.Linq;
-using System.Net;
+﻿using log4net;
+
 using System.Web.Mvc;
-using WebWarehouse.DAL;
-using WebWarehouse.Models;
+using WebWarehouse.BLL;
+using WebWarehouse.Model;
 
 namespace WebWarehouse.Controllers
 {
     public class ItemCategoriesController : MyController
     {
-        private WarehouseContext db = new WarehouseContext();
+        private ItemCategoryBLL bll = new ItemCategoryBLL();
+
+        private ILog Logger = LogManager.GetLogger(typeof(ItemCategoriesController));
 
         // GET: ItemCategories/Create
         public ActionResult Create()
@@ -29,9 +30,13 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (ModelState.IsValid)
             {
-                db.ItemCategorys.Add(itemCategory);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (bll.Create(itemCategory))
+                {
+                    var msg = "A new ItemCategory was created with name: " + itemCategory.Name;
+                    Logger.Info(msg);
+                    TempData["SuccessMessage"] = msg;
+                    return RedirectToAction("Index");
+                }
             }
 
             return View(itemCategory);
@@ -44,12 +49,20 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which ItemCategory you wish to delete";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            ItemCategory itemCategory = db.ItemCategorys.Find(id);
+
+            ItemCategory itemCategory = bll.Find(id);
+
             if (itemCategory == null)
             {
-                return HttpNotFound();
+                var msg = "Could not find the specified ItemCategory";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(itemCategory);
         }
@@ -59,9 +72,7 @@ namespace WebWarehouse.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            ItemCategory itemCategory = db.ItemCategorys.Find(id);
-            db.ItemCategorys.Remove(itemCategory);
-            db.SaveChanges();
+            bll.Delete(id);
             return RedirectToAction("Index");
         }
 
@@ -72,12 +83,18 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which ItemCategory you wish to see";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            ItemCategory itemCategory = db.ItemCategorys.Find(id);
+            ItemCategory itemCategory = bll.Find(id);
             if (itemCategory == null)
             {
-                return HttpNotFound();
+                var msg = "Cannot find the specified ItemCategory -> Did you use the right link?";
+                Logger.Error(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(itemCategory);
         }
@@ -89,12 +106,18 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                var msg = "You must specify which ItemCategory you wish to edit";
+                Logger.Warn(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
-            ItemCategory itemCategory = db.ItemCategorys.Find(id);
+            ItemCategory itemCategory = bll.Find(id);
             if (itemCategory == null)
             {
-                return HttpNotFound();
+                var msg = "Cannot find the specified ItemCategory -> Did you use the right link?";
+                Logger.Error(msg);
+                TempData["ErrorMessage"] = msg;
+                return RedirectToAction("Index");
             }
             return View(itemCategory);
         }
@@ -109,9 +132,20 @@ namespace WebWarehouse.Controllers
             addCustomMessages();
             if (ModelState.IsValid)
             {
-                db.Entry(itemCategory).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (bll.Update(itemCategory))
+                {
+                    var msg = "You have updated ItemCategory with id: " + itemCategory.ID;
+                    Logger.Info(msg);
+                    TempData["SuccessMessage"] = msg;
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    var msg = "Updating the ItemCategory with id: " + itemCategory.ID + " failed.";
+                    Logger.Warn(msg);
+                    TempData["ErrorMessage"] = msg;
+                    addCustomMessages();
+                }
             }
             return View(itemCategory);
         }
@@ -121,16 +155,7 @@ namespace WebWarehouse.Controllers
         {
             CheckLoginStatus();
             addCustomMessages();
-            return View(db.ItemCategorys.ToList());
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
+            return View(bll.FindAll());
         }
     }
 }
