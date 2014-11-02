@@ -8,13 +8,25 @@ using WebWarehouse.Model;
 
 namespace WebWarehouse.BLL
 {
-    public class UserBLL
+    public class UserBLL : IUserBLL
     {
-        private UserDAL db = new UserDAL();
 
-        public bool Create(User User)
+        private IUserRepository db;
+
+        public UserBLL()
         {
-            return db.Create(User);
+            db = new UserRepository();
+        }
+
+        public UserBLL(IUserRepository stub)
+        {
+            db = stub;
+        }
+
+
+        public bool Create(User user)
+        {
+            return db.Create(user);
         }
 
         public bool Delete(int id)
@@ -23,15 +35,15 @@ namespace WebWarehouse.BLL
             return db.Delete(id);
         }
 
-        public User Find(int? id)
+        public User Find(int id)
         {
         
             return db.Find(id);
         }
 
-        public bool Update(User User)
+        public bool Update(User user)
         {
-            return db.Update(User);
+            return db.Update(user);
         }
 
         public ICollection<User> FindAll()
@@ -44,13 +56,14 @@ namespace WebWarehouse.BLL
             return db.existingUser(user);
         }
 
-        public Order getFirstOrderByStatus(int? userID, OrderEnum orderEnum)
+        public Order getFirstOrderByStatus(int userID, OrderEnum orderEnum)
         {
             return db.getFirstOrderByStatus(userID, orderEnum);
         }
-
-      
-
-
+        
+        public Order ActiveOrder(int userId)
+        {
+            return db.ActiveOrder(userId);
+        }
     }
 }

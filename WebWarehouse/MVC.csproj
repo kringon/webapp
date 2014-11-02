@@ -212,6 +212,7 @@
     <Content Include="Views\Orders\ActiveOrder.cshtml" />
     <Content Include="Views\Orders\CheckOut.cshtml" />
     <Content Include="Views\Orders\Reciept.cshtml" />
+    <Content Include="Views\Users\ActiveOrder.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

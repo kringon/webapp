@@ -48,8 +48,9 @@
     <Compile Include="Item\ItemBLL.cs" />
     <Compile Include="Order\IOrderBLL.cs" />
     <Compile Include="Order\OrderBLL.cs" />
-    <Compile Include="UserBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="User\IUserBLL.cs" />
+    <Compile Include="User\UserBLL.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DAL\DAL.csproj">

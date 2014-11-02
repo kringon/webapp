@@ -79,16 +79,20 @@
         <div id="globalMessages" data-error="@ViewBag.ErrorMessage" data-success="@ViewBag.SuccessMessage" data-info="@ViewBag.InfoMessage" />
    
     </div>
-    <div class="modal fade" id="shoppingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-url="@Url.Action("ActiveOrder", "Orders", new { id = @ViewBag.UserID})">
+    <div class="modal fade" id="shoppingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-url="@Url.Action("ActiveOrder", "Users", new { userId = @ViewBag.UserID})">
         <div id="shoppingCart" class="modal-dialog">
         </div>
     </div>
     <script>
         $(document).ready(function () {
             $('#showCart').click(function () {
+                console.log()
                 var url = $('#shoppingModal').data('url');
+                console.log(url);
 
                 $.get(url, function (data) {
+
+                    console.log("return");
                     $('#shoppingCart').html(data);
 
                     $('#shoppingModal').modal('show');

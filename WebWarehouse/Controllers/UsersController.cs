@@ -1,4 +1,5 @@
 ﻿using log4net;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using WebWarehouse.BLL;
 using WebWarehouse.Model;
@@ -7,8 +8,36 @@ namespace WebWarehouse.Controllers
 {
     public class UsersController : MyController
     {
-        private UserBLL bll = new UserBLL();
+        private UserBLL bll;
         private ILog Logger = LogManager.GetLogger(typeof(UsersController));
+
+        public UsersController()
+        {
+            bll = new UserBLL();
+        }
+
+        public UsersController(UserBLL stub)
+        {
+            bll = stub;
+        }
+
+        [HttpGet]
+        public ActionResult ActiveOrder(int userId)
+        {
+
+            Logger.Info("entered method");
+            CheckLoginStatus();
+            addCustomMessages();
+
+            Order order = bll.ActiveOrder(userId);
+
+            if (order != null)
+            {
+                return PartialView(order);
+            }
+
+            return PartialView("ActiveOrder", order);
+        }
 
         // GET: Users/Create
         public ActionResult Create()
@@ -54,7 +83,7 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: Users/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
@@ -86,7 +115,7 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: Users/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
@@ -110,7 +139,7 @@ namespace WebWarehouse.Controllers
         }
 
         // GET: Users/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int id)
         {
             CheckLoginStatus();
             addCustomMessages();
@@ -187,7 +216,7 @@ namespace WebWarehouse.Controllers
         }
 
         //Get all the orders for a single user
-        public ActionResult listAllOrders(int? id)
+        public ActionResult listAllOrders(int id)
         {
             CheckLoginStatus();
             addCustomMessages();

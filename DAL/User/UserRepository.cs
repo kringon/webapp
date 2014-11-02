@@ -7,10 +7,10 @@ using WebWarehouse.Model;
 
 namespace WebWarehouse.DAL
 {
-    public class UserDAL
+    public class UserRepository : IUserRepository
     {
         private WarehouseContext Db = new WarehouseContext();
-        private ILog Logger = LogManager.GetLogger(typeof(UserDAL));
+        private ILog Logger = LogManager.GetLogger(typeof(UserRepository));
 
         //Create a new User from a bound User
         public bool Create(User User)
@@ -74,7 +74,7 @@ namespace WebWarehouse.DAL
         }
 
         //Find an UserCategory by ID
-        public User Find(int? Id)
+        public User Find(int Id)
         {
             User Found;
             try
@@ -103,7 +103,7 @@ namespace WebWarehouse.DAL
             }
         }
 
-        public Order getFirstOrderByStatus(int? UserID, OrderEnum orderEnum)
+        public Order getFirstOrderByStatus(int UserID, OrderEnum orderEnum)
         {
             try
             {
@@ -139,6 +139,37 @@ namespace WebWarehouse.DAL
             var algoritme = System.Security.Cryptography.SHA256.Create();
             byte[] data = System.Text.Encoding.ASCII.GetBytes(password);
             return Convert.ToBase64String(algoritme.ComputeHash(data));
+        }
+
+
+
+        public Order ActiveOrder(int userId)
+        {
+            Logger.Info("Entered Active ORder");
+            User user = Find(userId);
+            Order emptyOrder = getFirstOrderByStatus(userId, OrderEnum.Empty);
+            Order browsingOrder = getFirstOrderByStatus(userId, OrderEnum.Browsing);
+
+            if (emptyOrder == null && browsingOrder == null)
+            {
+
+                Logger.Info("No Active ORder");
+                Order newOrder = new Order();
+                newOrder.Items = new List<Item>();
+                user.Orders.Add(newOrder);
+
+                Update(user);
+
+                return newOrder;
+            }
+            if (browsingOrder != null)
+            {
+                Logger.Info("Browsing ORder");
+                return browsingOrder;
+            }
+
+            Logger.Info("Return Null From Active ORder");
+            return null;
         }
     }
 }

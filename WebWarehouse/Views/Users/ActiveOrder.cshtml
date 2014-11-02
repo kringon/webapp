@@ -1,0 +1,97 @@
+﻿@model WebWarehouse.Model.Order
+
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Handleliste</h4>
+    </div>
+    <div class="modal-body">
+        <table class="table table-striped">
+
+            <thead>
+                <tr>
+                    <th>
+                        ItemID
+                    </th>
+                    <th>
+                        Navn
+                    </th>
+                    <th>
+                        Pris
+                    </th>
+                    <th>
+                        Antall
+                    </th>
+                    <th>Sum</th>
+                    <th>
+                        Fjern
+                    </th>
+                </tr>
+
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+
+                    <tr class="itemRow">
+
+                        <td>@item.ID</td>
+                        <td>@item.Name</td>
+                        <td>@item.Price kr</td>
+                        <td>@Model.getItemQuantity(item).Value stk</td>
+                        <td>@Model.getItemQuantity(item).getTotalValue() kr</td>
+                        <td><button class="btn btn-danger shoppingCartRemove" data-userid="@Model.user.ID" data-itemid="@item.ID"><i class="fa fa-remove "></i></button></td>
+                    </tr>
+
+
+                }
+
+            </tbody>
+        </table>
+        <div class="row">
+            
+                        <div class="col col-xs-4"><b>Ordresum: </b><span id="totalPrice">@Model.getTotalPrice()</span> kr</div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Lukk</button>
+        <a href="@Url.Action("CheckOut", "Orders", new { orderID = @Model.ID })" class="btn btn-primary">Betal</a>
+    </div>
+</div>
+
+<script>
+
+    $('.shoppingCartRemove').click(function () {
+
+        var data_itemid = $(this).data('itemid');
+        var data_userid = $(this).data('userid');
+        var itemRow = $(this).parents('.itemRow');
+        console.log(itemRow);
+
+        console.log("clicked removeButton");
+        $.ajax({
+
+            url: '@Url.Action("RemoveItem","Orders")',
+            dataType: "JSON",
+            data: {
+                itemid: data_itemid,
+                userid: data_userid
+            },
+            success: function (data) {
+                console.log(data);
+                
+                itemRow.remove();
+                $("#totalPrice").text(data.totalPrice);
+                
+
+
+            },
+            error: function (data) {
+                console.log(data);
+            },
+        })
+    })
+</script>
+
+
