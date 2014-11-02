@@ -14,18 +14,23 @@ namespace WebWarehouse.Controllers
         public UsersController()
         {
             bll = new UserBLL();
+
+         
         }
 
         public UsersController(UserBLL stub)
         {
             bll = stub;
+
+            
+
         }
 
         [HttpGet]
         public ActionResult ActiveOrder(int userId)
         {
 
-            Logger.Info("entered method");
+           
             CheckLoginStatus();
             addCustomMessages();
 
@@ -33,6 +38,7 @@ namespace WebWarehouse.Controllers
 
             if (order != null)
             {
+                Logger.Info("Showing webbasket to customer with userId: " + userId);
                 return PartialView(order);
             }
 
@@ -87,13 +93,6 @@ namespace WebWarehouse.Controllers
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which User you wish to delete";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
             User user = bll.Find(id);
             if (user == null)
             {
@@ -119,13 +118,7 @@ namespace WebWarehouse.Controllers
         {
             CheckLoginStatus();
             addCustomMessages();
-            if (id == null)
-            {
-                var msg = "You must specify which User you wish to see";
-                Logger.Warn(msg);
-                TempData["ErrorMessage"] = msg;
-                return RedirectToAction("Index");
-            }
+      
             User user = bll.Find(id);
 
             if (user == null)
@@ -144,17 +137,11 @@ namespace WebWarehouse.Controllers
             CheckLoginStatus();
             addCustomMessages();
             int sessionId;
-            if (Session["UserID"] != null)
+            if (Session != null && Session["UserID"] != null)
             {
                 sessionId = (int)Session["UserID"];
-                if (id == null)
-                {
-                    var msg = "You must specify which User you wish to edit";
-                    Logger.Warn(msg);
-                    TempData["ErrorMessage"] = msg;
-                    return RedirectToAction("Index");
-                }
-                else if (id != sessionId)
+             
+                if (id != sessionId)
                 {
                     TempData["ErrorMessage"] = "Du har ikke lov til å redigere andre brukere!";
                     return RedirectToAction("Index", "Home");

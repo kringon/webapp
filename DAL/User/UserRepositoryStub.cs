@@ -1,14 +1,27 @@
-﻿using log4net;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
 using WebWarehouse.Model;
 
 namespace WebWarehouse.DAL
 {
     public class UserRepositoryStub : IUserRepository
     {
+        public Order ActiveOrder(int userId)
+        {
+            if (userId == 0)
+            {
+                return null;
+            }
+            else
+            {
+
+               Order order = new Order()
+                {
+                    ID = userId
+                };
+               return order;
+            }
+        }
 
         //Create a new User from a bound User
         public bool Create(User user)
@@ -71,7 +84,6 @@ namespace WebWarehouse.DAL
 
         public Order getFirstOrderByStatus(int userID, OrderEnum orderEnum)
         {
-
             if (userID != 0 && orderEnum != null)
             {
                 Order order = new Order()
@@ -95,31 +107,6 @@ namespace WebWarehouse.DAL
             else
                 return true;
         }
-        public Order ActiveOrder(int userId)
-        {
-
-            User user = Find(userId);
-            Order emptyOrder = getFirstOrderByStatus(userId, OrderEnum.Empty);
-            Order browsingOrder = getFirstOrderByStatus(userId, OrderEnum.Browsing);
-
-            if (emptyOrder == null && browsingOrder == null)
-            {
-                Order newOrder = new Order();
-                newOrder.Items = new List<Item>();
-                user.Orders.Add(newOrder);
-
-                Update(user);
-
-                return newOrder;
-            }
-            if (browsingOrder != null)
-            {
-                return browsingOrder;
-            }
-            return null;
-        }
-
-
         private String hash(string password)
         {
             var algoritme = System.Security.Cryptography.SHA256.Create();

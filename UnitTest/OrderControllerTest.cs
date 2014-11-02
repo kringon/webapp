@@ -15,11 +15,7 @@ namespace WebWarehouse.UnitTest
         //Setup the Stub for testing -> Done once since it is the same for every method.
         private OrdersController controller = new OrdersController(new OrderBLL(new OrderRepositoryStub()));
 
-        [TestMethod]
-        public void AactiveOrder_show_partial_view()
-        {
-
-        }
+       
 
         //[TestMethod]
         //public void Create_db_error_post()

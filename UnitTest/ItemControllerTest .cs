@@ -146,7 +146,7 @@ namespace WebWarehouse.UnitTest
             //Arrange
             int itemId = 1;
             //Act
-            ViewResult result = (ViewResult)controller.Details(itemId);
+            ViewResult result = (ViewResult)controller.Edit(itemId);
             //Assert
             Assert.AreEqual(result.ViewName, "");
             Assert.IsInstanceOfType(result.Model, typeof(Item));
@@ -158,7 +158,7 @@ namespace WebWarehouse.UnitTest
             //Arrange
             int input = 0;
             //Act
-            RedirectToRouteResult result = (RedirectToRouteResult)controller.Details(input);
+            RedirectToRouteResult result = (RedirectToRouteResult)controller.Edit(input);
 
             //Assert
             Assert.AreEqual(result.RouteName, "");
